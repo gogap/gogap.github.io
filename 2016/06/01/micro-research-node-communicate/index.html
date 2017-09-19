@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Micro - 服务间的通讯浅析 | Gogap</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Micro," />
+  
+
+  <meta name="description" content="传输层 (Transport )目前官方支持的Transport  HTTP NATS Rabbitmq  Transport的作用  将传输的内容统一成如下格式，并序列化成  1234type Message struct &amp;#123;Header map[string]stringBody   []byte&amp;#125;  服务 Node 和 Node 之间的消息传输  协议 (Codec)目前">
+<meta name="keywords" content="Micro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Micro - 服务间的通讯浅析">
+<meta property="og:url" content="http://gogap.cn/2016/06/01/micro-research-node-communicate/index.html">
+<meta property="og:site_name" content="Gogap">
+<meta property="og:description" content="传输层 (Transport )目前官方支持的Transport  HTTP NATS Rabbitmq  Transport的作用  将传输的内容统一成如下格式，并序列化成  1234type Message struct &amp;#123;Header map[string]stringBody   []byte&amp;#125;  服务 Node 和 Node 之间的消息传输  协议 (Codec)目前">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-19T06:23:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Micro - 服务间的通讯浅析">
+<meta name="twitter:description" content="传输层 (Transport )目前官方支持的Transport  HTTP NATS Rabbitmq  Transport的作用  将传输的内容统一成如下格式，并序列化成  1234type Message struct &amp;#123;Header map[string]stringBody   []byte&amp;#125;  服务 Node 和 Node 之间的消息传输  协议 (Codec)目前">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#传输层-Transport"><span class="toc-text">传输层 (Transport )</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#协议-Codec"><span class="toc-text">协议 (Codec)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Q-amp-A"><span class="toc-text">Q&A</span></a>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-micro-research-node-communicate" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Micro - 服务间的通讯浅析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2016.06.01</span>
+      </span>
+
+       
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>zeal</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/微服务/">微服务</a>
+  </span>
+
+
+
+      
+
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h4 id="传输层-Transport"><a href="#传输层-Transport" class="headerlink" title="传输层 (Transport )"></a>传输层 (Transport )</h4><p>目前官方支持的Transport</p>
+<ul>
+<li>HTTP</li>
+<li>NATS</li>
+<li>Rabbitmq</li>
+</ul>
+<p>Transport的作用</p>
+<ul>
+<li>将传输的内容统一成如下格式，并序列化成</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Message <span class="keyword">struct</span> &#123;</div><div class="line">Header <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></div><div class="line">Body   []<span class="keyword">byte</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>服务 Node 和 Node 之间的消息传输</li>
+</ul>
+<h4 id="协议-Codec"><a href="#协议-Codec" class="headerlink" title="协议 (Codec)"></a>协议 (Codec)</h4><p>目前支持的协议</p>
+<ul>
+<li>JSON</li>
+<li>PROTOBUF</li>
+</ul>
+<p>服务底层的协议格式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Message <span class="keyword">struct</span> &#123;</div><div class="line">Header <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></div><div class="line">Body   []<span class="keyword">byte</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h3><ol>
+<li><em>两个服务节点之间是否可以支持使用不同的 <code>Transport</code></em></li>
+</ol>
+<blockquote>
+<p>不支持，因为传输层是需要进行数据序列化和反序列化的，同时节点通讯其实是Transport的Client和Server进行通讯。（Server部分可以使用martini, gin, echo 等框架实现，但是他们同属于HTTP范畴，所以可以认定为相同的Transport）</p>
+</blockquote>
+<ol>
+<li><em>服务于服务之间是如何传输的，如果客户端使用某种协议时，服务端是如何响应并解码的？</em></li>
+</ol>
+<blockquote>
+<p>Micro 服务是基于 Transport 进行的，Transport 可以有多种实现方式，例如 RabbitMQ，NSQ，HTTP，NTATS……，由于不同的Transport有自己的协议，例如HTTP的协议我们基本可以认为他会分为 Header 和 Body 两个部分，因此，HTTP Transport 的实现就会把请求里的HTTP Request Header 作为 Message 里的 Header， Body 也直接从请求里获取，也就正好填充了 Message 这个结构体，Micro Server 根据 Header 里的 Content-Type 来确定使用哪一种 Codec 来进行解码，目前只有JSON和 ProtoBuf，Codec 的作用是将Body里的数据解码到具体的服务的协议。</p>
+</blockquote>
+
+    
+  </div>
+  
+    
+<div class="share_jia">
+   <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">
+            分享到: &nbsp;
+        </span>
+<a class="jiathis_button_tsina"></a>
+<a class="jiathis_button_weixin"></a>
+<a class="jiathis_button_evernote"></a>
+<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+</div>
+
+  
+
+</article>
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'gogap';
+    
+    var disqus_url = 'http://gogap.cn/2016/06/01/micro-research-node-communicate/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
+
+
+
+    
+
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>用Go语言写个外挂（上） | Gogap</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="gogap,golang,micro,微服务,Go语言,micro service,流式编程,flow" />
+  
+
+  <meta name="description" content="本人在一家互联网金融公司上班，对于一家互联网金融公司，最基本的功能就是客户入金和出金，而出金的稳定性是很重要的，出金不畅容易导致投资人恐慌，本文讲的是出金，出金接口我们对接的是招商银行的银企直联系统，那么银企直连系统是一个什么样的程序呢？  没错，这个程序是运行在Windows上的，并且需要插入USBKey才能正常工作，这就意味着，不能简单的使用命令行进行运维管理。 看到这里，做运维的同学的内心应">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Go语言写个外挂（上）">
+<meta property="og:url" content="http://gogap.cn/2017/05/13/用Go语言写个外挂（上）/index.html">
+<meta property="og:site_name" content="Gogap">
+<meta property="og:description" content="本人在一家互联网金融公司上班，对于一家互联网金融公司，最基本的功能就是客户入金和出金，而出金的稳定性是很重要的，出金不畅容易导致投资人恐慌，本文讲的是出金，出金接口我们对接的是招商银行的银企直联系统，那么银企直连系统是一个什么样的程序呢？  没错，这个程序是运行在Windows上的，并且需要插入USBKey才能正常工作，这就意味着，不能简单的使用命令行进行运维管理。 看到这里，做运维的同学的内心应">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://gogap.cn/images/waigua/1.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/2.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/3.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/4.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/5.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/6.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/7.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/8.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/9.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/10.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/11.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/12.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/13.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/14.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/15.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/16.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/17.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/18.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/19.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/20.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/21.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/22.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/23.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/24.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/25.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/26.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/27.png">
+<meta property="og:image" content="http://gogap.cn/images/waigua/28.png">
+<meta property="og:updated_time" content="2017-09-19T07:11:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用Go语言写个外挂（上）">
+<meta name="twitter:description" content="本人在一家互联网金融公司上班，对于一家互联网金融公司，最基本的功能就是客户入金和出金，而出金的稳定性是很重要的，出金不畅容易导致投资人恐慌，本文讲的是出金，出金接口我们对接的是招商银行的银企直联系统，那么银企直连系统是一个什么样的程序呢？  没错，这个程序是运行在Windows上的，并且需要插入USBKey才能正常工作，这就意味着，不能简单的使用命令行进行运维管理。 看到这里，做运维的同学的内心应">
+<meta name="twitter:image" content="http://gogap.cn/images/waigua/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-用Go语言写个外挂（上）" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">用Go语言写个外挂（上）</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2017.05.13</span>
+      </span>
+
+       
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>Zeal</span>
+        </span>
+      
+
+      
+
+
+      
+
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>本人在一家互联网金融公司上班，对于一家互联网金融公司，最基本的功能就是客户入金和出金，而出金的稳定性是很重要的，出金不畅容易导致投资人恐慌，本文讲的是出金，出金接口我们对接的是招商银行的银企直联系统，那么银企直连系统是一个什么样的程序呢？</p>
+<p><img src="/images/waigua/1.png" alt="image.png"></p>
+<p>没错，这个程序是运行在Windows上的，并且需要插入USBKey才能正常工作，这就意味着，不能简单的使用命令行进行运维管理。</p>
+<p>看到这里，做运维的同学的内心应该和我一样是崩溃的。。</p>
+<p><img src="/images/waigua/2.png" alt="image.png"></p>
+<p>跟大家解释一下，这个服务是做什么的，大家可以把这个程序当成是我们的业务系统和招商银行沟通的信使，所有出金操作、查询操作都是通过这个信使来完成。</p>
+<p>由于各种未知的原因，比如网络不稳定，或者USBKey插入时间过长产生了一些莫名其妙的错误，那么就需要人工去重启一下服务或重新登录一下账号，而且，这个工作有时候是在夜间操作的，这相当于要24小时待命啊，虽然故障频率不高，但这根弦始终是崩着的，这简直就是在破坏我的幸福美好生活啊。</p>
+<p><img src="/images/waigua/3.png" alt="image.png"></p>
+<p>这种体力活的事情，我坚决不能干，所以一定要交给别人干。</p>
+<p><img src="/images/waigua/4.png" alt="image.png"></p>
+<p>别想多了，【别人】也只能是个外挂而已，谁都不喜欢干这种人肉体力活。</p>
+<p>所以凭借着我18岁那年的开发经验，脑子里想到了 Windows 的消息模型，使用 <code>SendMessage</code> 给对应的窗体控件句柄发送特定的事件不就搞定了么，异常自动重启使用 <code>CreateProcess</code> 不就行了吗？</p>
+<p>天真的我脑子里已经充满了 <code>SendMessage</code> 的语句</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function">LRESULT WINAPI <span class="title">SendMessage</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">  _In_ HWND   hWnd,</span></span></div><div class="line"><span class="function"><span class="params">  _In_ UINT   Msg,</span></span></div><div class="line"><span class="function"><span class="params">  _In_ WPARAM wParam,</span></span></div><div class="line"><span class="function"><span class="params">  _In_ LPARAM lParam</span></span></div><div class="line"><span class="function"><span class="params">)</span></span>;</div></pre></td></tr></table></figure>
+<p>有木有很熟悉的样子，惊不惊喜，开不开心？是不是感觉发送键盘点击事件、鼠标点击事件就OK了？</p>
+<blockquote>
+<p>后面会讲到，其实还需要很多工作才能完成一个比较完善可用的外挂软件，<code>SendMessage</code> 基本上只能解决一部分问题</p>
+</blockquote>
+<p>然而当我想完这些代码后，感觉还是太麻烦，因为按键精灵这类软件就能解决，为什么还要自己亲自操刀？不过最终放弃了这种念头，因为这是一个很重要的服务，说不定在未来会掌握好 <code>几千个亿</code> 的资金命运，如果安装了不明软件，资金安全如何得以保障？？？绝对不能这么草草的做这种决定，所以还是决定老老实实的撸代码了。。。</p>
+<p>用什么语言是个问题，在Windows上可以使用 <code>C++</code> , <code>C#</code> 系列，而且<code>C#</code>我记得有一个automation框架可以完成类似的操作，不过本人最近这3年一直在使用 <code>golang</code>，前两种语言目前也只是偶尔用用的节奏，所以基本处于手生的状态，而 <code>golang</code> 本身也支持使用 <code>syscall</code> 来调用 <code>windows</code> 的 <code>DLL</code>（动态链接库），所以果断使用 <code>golang</code>,  因为这个外挂大部分的WinAPI都在 <code>user32.dll</code> 和 <code>kernel32.dll</code> 里，我们只需要能加载这几个<code>DLL</code> 就可以调用强大的 <code>WinAPI</code> 了</p>
+<p><img src="/images/waigua/5.png" alt="image.png"></p>
+<blockquote>
+<p>大家可以使用 PE Explorer 查看一个DLL有哪些输出函数</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> (</div><div class="line">    moduser32 = syscall.NewLazyDLL(<span class="string">"user32.dll"</span>)</div><div class="line">    procSendMessage = moduser32.NewProc(<span class="string">"SendMessageW"</span>)</div><div class="line">    procPostMessage = moduser32.NewProc(<span class="string">"PostMessageW"</span>)</div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">SendMessage</span><span class="params">(hwnd HWND, msg <span class="keyword">uint32</span>, wParam, lParam <span class="keyword">uintptr</span>)</span> <span class="title">uintptr</span></span> &#123;</div><div class="line">	ret, _, _ := procSendMessage.Call(</div><div class="line">		<span class="keyword">uintptr</span>(hwnd),</div><div class="line">		<span class="keyword">uintptr</span>(msg),</div><div class="line">		wParam,</div><div class="line">		lParam)</div><div class="line"></div><div class="line">	<span class="keyword">return</span> ret</div><div class="line">&#125;</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>大家可以看到，在这里我们使用的是<code>SendMessageW</code>，而不是<code>SendMessageA</code>，因为<code>go</code>语言底层调用<code>DLL</code>接口时，传入的是<code>utf16</code>，看看下面的代码就明白了</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">SetWindowText</span><span class="params">(hwnd HWND, text <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">	procSetWindowText.Call(</div><div class="line">		<span class="keyword">uintptr</span>(hwnd),</div><div class="line">		<span class="keyword">uintptr</span>(unsafe.Pointer(syscall.StringToUTF16Ptr(text))))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这是一个设置窗体标题的API，第一个参数是窗体句柄，第二个参数大家可以看到，是将go语言的字符串转换成UTF16格式，并获取其指针。</p>
+<p>另外值得注意的是，如果我们编译出来的程序是<code>32位</code>的，那么尽量不要用来作为<code>64位</code>程序的外挂，因为有很多复杂一点的功能无法实现，后续会提到这个部分，<code>银企直连</code> 这个服务是32位的，因此我们的go语言也是安装的32位的，同时为了更好的编译测试，我的虚拟机装的是 <code>Win2008 R2 32位</code> 操作系统</p>
+<p>那么我们应该如何向一个窗体发送消息呢？能不能先做实验，不写代码呢？答案是肯定的，我们先请出我们的神器，<code>Spy++</code></p>
+<p><img src="/images/waigua/6.png" alt="image.png"></p>
+<blockquote>
+<p>将瞄准器拖拽到具体的窗口上，就会得到窗口的句柄，我们可以通过 FindWindowW 或 EnumChildWindows 来实现相同的功能</p>
+</blockquote>
+<p>银企直连正常工作需要两个步骤</p>
+<ol>
+<li>启动HTTP服务监听</li>
+<li>登录</li>
+</ol>
+<p>我们先看看启动HTTP监听按钮</p>
+<p><img src="/images/waigua/7.png" alt="image.png"></p>
+<p>我们使用<code>spy++</code>抓到了这个ToolBar的句柄</p>
+<p><img src="/images/waigua/8.png" alt="image.png"></p>
+<p>然后用 <code>spy++</code> 向第一个按钮发送鼠标点击事件，那么就可以开启监听了</p>
+<p><img src="/images/waigua/9.png" alt="image.png"></p>
+<p>点击动作在Windows消息来看，是分为两个动作，一个是 <code>WM_LBUTTONDOWN</code> 而另一个是 <code>WM_LBUTTONUP</code> ，所以我们需要发送两次事件，当完成这两次发送后，我们可以看到下面的界面</p>
+<p><img src="/images/waigua/10.png" alt="image.png"></p>
+<p>没错，其实这里是一个坑，启动监听还不好好启动，非得弹出一个消息框，同时伴随着的是<code>spy++</code>卡死了，为什么呢？ 因为我们使用的是<code>SendMessage</code>，这是一个同步的过程，因为出现了消息框，所以<code>spy++</code>还未收到返回消息，所以就卡死了。当我们点击完 确认 按钮后就可以恢复了，当然我们也可以使用 <code>PostMessage</code> ，不过这个接口只适合不在乎执行结果的情况下执行。</p>
+<p>好了，这里我们出现了第一个坑：有弹窗，我们的外挂需要自动识别，并且能够自动关闭弹窗。</p>
+<p><img src="/images/waigua/11.png" alt="image.png"></p>
+<p>OK, 我们继续，我们该开始登陆了</p>
+<p><img src="/images/waigua/12.png" alt="image.png"></p>
+<p>刚才我们 <code>SendMessage</code> 里的WPARAM是1，那么，这个按钮是4</p>
+<p><img src="/images/waigua/13.png" alt="image.png"></p>
+<p>继续使用 <code>spy++</code> 发送消息</p>
+<p><img src="/images/waigua/14.png" alt="image.png"></p>
+<p>模拟完发送，整个人一下子就不好了，因为这个按钮根本就没有反应，后面的两个参数你也不知道到底传什么好，就在陷入了整个困局的时候，发现我们其实可以通过快捷键 <code>ctrl+b</code> 完成监听， <code>ctrl+i</code> 进入登录界面</p>
+<p><img src="/images/waigua/15.png" alt="image.png"></p>
+<blockquote>
+<p>此时未插入USBKey</p>
+</blockquote>
+<p>所以，我们需要使用另外一个API: <code>SendInput</code>, 包括后面的密码输入，也一样要使用这个API</p>
+<p>我们看一下这个API的定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function">UINT WINAPI <span class="title">SendInput</span><span class="params">(</span></span></div><div class="line"><span class="function"><span class="params">  _In_ UINT    nInputs, <span class="comment">// 按键数量</span></span></span></div><div class="line"><span class="function"><span class="params">  _In_ LPINPUT pInputs, <span class="comment">// 按键内容数组</span></span></span></div><div class="line"><span class="function"><span class="params">  _In_ <span class="keyword">int</span>     cbSize <span class="comment">// 数组内容结构体的尺寸</span></span></span></div><div class="line"><span class="function"><span class="params">)</span></span>;</div></pre></td></tr></table></figure>
+<p>看上去很心塞，一堆参数。</p>
+<p><img src="/images/waigua/16.png" alt="image.png"></p>
+<p>由于本文讲解的是调研篇，我们此处假设<code>SendInput</code>可以完成快捷键的按键模拟，密码输入的按键模拟，实际上这个API确实是可以工作的，因为这个接口是真实的模拟键盘输入，不针对某个窗口句柄。</p>
+<p>接下来我们会迎来第二个坑，如果USBKey正常工作，那么用户名里的的内容是自动填写好的，如图：</p>
+<p><img src="/images/waigua/17.png" alt="image.png"></p>
+<p>这个用户名是从USBKey里读出来的，读取是需要时间的，因此我们可以在这里不停的向这个文本框发送<code>WM_GETTEXT</code> 消息，拿到用户名，如果用户名是预期的数据，我们就认为此时USBKey是正常工作的，否则如果长时间用户名未成功加载，则说明USBKey工作异常，应该发送报警信息。</p>
+<p><img src="/images/waigua/18.png" alt="image.png"></p>
+<p><img src="/images/waigua/19.png" alt="image.png"></p>
+<p><img src="/images/waigua/20.png" alt="image.png"></p>
+<p>我们大概会得到如下几类错误</p>
+<ul>
+<li>密码错误</li>
+<li>通讯故障</li>
+<li>USBKey有问题</li>
+</ul>
+<p>对于密码错误这个问题，我们的外挂应该立即停止工作，因为密码输入次数超过限制，USBKey将会锁定，公司出金服务就挂了。。。。</p>
+<p><img src="/images/waigua/21.png" alt="image.png"></p>
+<blockquote>
+<p>为什么会密码输入错误呢？因为很有可能在自动输入时，被其他程序干扰了一下<br>我们在代码中会尽量用 <code>SetForegroundWindow</code> 让窗口保持在最前面，成为激活状态</p>
+</blockquote>
+<p>那么对于通讯故障，解决的办法就只能是重新尝试了</p>
+<p>剩下的问题，我个人认为发出报警，人工处理一下会比较合适。</p>
+<p>此时迎来两个新问题，</p>
+<ol>
+<li>我们如何知道消息框里的内容是什么</li>
+<li>我们如何知道外挂登录成功了呢？</li>
+</ol>
+<p>对于第一个问题，我们可以通过 <code>EnumChildWindows</code> 来遍历这个消息框的孩子句柄，然后通过 <code>GetWindowText</code>  就可以知道是什么内容了。</p>
+<p>我们重点来讨论第二个问题</p>
+<p>此处有两种解法:</p>
+<ol>
+<li>向招行发起查询请求，如果能查询到数据，说明登录成功</li>
+<li>检查登陆信息里的内容</li>
+</ol>
+<p><img src="/images/waigua/22.png" alt="image.png"></p>
+<blockquote>
+<p>登陆信息列表</p>
+</blockquote>
+<p>为了提升难度，我们选择方案2 </p>
+<p><img src="/images/waigua/23.png" alt="image.png"></p>
+<p>这种方法是比较困难的，有困难，我们要解决，没有困难我们也要创造困难来解决。。。。</p>
+<p>为什么难呢？</p>
+<p>因为我们没办法通过<code>SendMessage</code> 发送 <code>WM_GETTEXT</code> 事件获取内容，但是我们可以通过 <code>LVM_GETITEMTEXT</code> 来获取 listview 的列表内容</p>
+<p>BUT….. 跨进程这么拿是拿不到的，同时，不同位数的进程，也是拿不到数据的。</p>
+<p>如何解决？</p>
+<p>我们需要使用API <code>VirtualAllocEx</code> 向银企直联进程申请一块内存空间，用于我们的外挂进程和银企直联进行数据沟通，当我们发送 <code>LVM_GETITEMTEXT</code> 消息之前，我们需要把参数信息写到这个内存块里，然后再使用<code>SendMessage</code>，ListView的数据会写到这个内存块，最后我们通过 <code>ReadProcessMemory</code> 来读取获取到列表的数据</p>
+<p>这里就是为什么<code>32位</code>不能读<code>64位</code>程序的内容的原因了，虽然我们可以使用<code>WriteProcessMemory</code> 和 <code>ReadProcessMemory</code> 来写入和读取进程内存里的数据，但是由于通过这种机制进行交互，指针大小是不同的，通过<code>SendMessage</code>指令虽然能执行成功，但是回写的数据内容会跑飞。</p>
+<p><img src="/images/waigua/24.png" alt="image.png"></p>
+<blockquote>
+<p>箭头代表数据流向，所有的API调用都是在外挂这边完成的</p>
+</blockquote>
+<p>整个流程大概就是这样的，我们需要借助远程进程的内存块来做数据交互，但最后切记一定要使用<code>VirtualFreeEx</code> 释放掉不用的内存块。</p>
+<blockquote>
+<p>此处应该有总结：</p>
+</blockquote>
+<ol>
+<li>使用模拟键盘的方法开启监听和进入到登录界面而非<code>SendMessage</code></li>
+<li>通过远程申请内存块的方式获取登录结果内容</li>
+<li>需要判断弹出消息框的内容，用以判断是否有异常，同时需要关闭这些消息窗口</li>
+</ol>
+<p>到此为止，关键的技术内容我们已经调研完了，下一篇内容我们会讲如何使用go语言实现一个真正可用的外挂。<br>我们先来预览几个外挂的截图吧：</p>
+<p>外挂工作中…..</p>
+<p><img src="/images/waigua/25.png" alt="image.png"></p>
+<p>当发生稳定性异常时，会通过bearychat的Incoming服务发送报警</p>
+<p><img src="/images/waigua/26.png" alt="image.png"></p>
+<p><img src="/images/waigua/27.png" alt="image.png"></p>
+<p>欢迎关注我的微信公众号：<strong>DeepIn-z</strong></p>
+<p><img src="/images/waigua/28.png" alt="image.png"></p>
+
+    
+  </div>
+  
+    
+<div class="share_jia">
+   <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">
+            分享到: &nbsp;
+        </span>
+<a class="jiathis_button_tsina"></a>
+<a class="jiathis_button_weixin"></a>
+<a class="jiathis_button_evernote"></a>
+<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+</div>
+
+  
+
+</article>
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'gogap';
+    
+    var disqus_url = 'http://gogap.cn/2017/05/13/用Go语言写个外挂（上）/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
+
+
+
+    
+
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>怎样自动化部署微服务 | Gogap</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="CI,Micro," />
+  
+
+  <meta name="description" content="这篇文章【不是翻译】，是讨论我们团队在实际开发和运维过程中，怎样基于gitlab的CI系统和supervisor，进行微服务的自动化部署。 CI持续集成的重要性不用多说，能够显著提高开发、部署和运维效率，但非侵入式的持续集成架构是很难的，此处分享我们在小型的开发团队中采用的持续集成方案。 Gitlab我们采用自建gitlab进行代码版本管理，通过docker进行搭建极其容易。目前的gitlab C">
+<meta name="keywords" content="CI,Micro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="怎样自动化部署微服务">
+<meta property="og:url" content="http://gogap.cn/2016/05/30/deploy-micro/index.html">
+<meta property="og:site_name" content="Gogap">
+<meta property="og:description" content="这篇文章【不是翻译】，是讨论我们团队在实际开发和运维过程中，怎样基于gitlab的CI系统和supervisor，进行微服务的自动化部署。 CI持续集成的重要性不用多说，能够显著提高开发、部署和运维效率，但非侵入式的持续集成架构是很难的，此处分享我们在小型的开发团队中采用的持续集成方案。 Gitlab我们采用自建gitlab进行代码版本管理，通过docker进行搭建极其容易。目前的gitlab C">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://gogap.cn/images/micro-monitor-code.jpg">
+<meta property="og:image" content="http://gogap.cn/images/ci-01.jpg">
+<meta property="og:image" content="http://gogap.cn/images/ci-02.jpg">
+<meta property="og:updated_time" content="2017-09-19T06:23:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="怎样自动化部署微服务">
+<meta name="twitter:description" content="这篇文章【不是翻译】，是讨论我们团队在实际开发和运维过程中，怎样基于gitlab的CI系统和supervisor，进行微服务的自动化部署。 CI持续集成的重要性不用多说，能够显著提高开发、部署和运维效率，但非侵入式的持续集成架构是很难的，此处分享我们在小型的开发团队中采用的持续集成方案。 Gitlab我们采用自建gitlab进行代码版本管理，通过docker进行搭建极其容易。目前的gitlab C">
+<meta name="twitter:image" content="http://gogap.cn/images/micro-monitor-code.jpg">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CI"><span class="toc-text">CI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Gitlab"><span class="toc-text">Gitlab</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Supervisor"><span class="toc-text">Supervisor</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Example"><span class="toc-text">Example</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-deploy-micro" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">怎样自动化部署微服务</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2016.05.30</span>
+      </span>
+
+       
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>lubia</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/CI/">CI</a>
+  </span>
+
+
+
+      
+
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>这篇文章【不是翻译】，是讨论我们团队在实际开发和运维过程中，怎样基于gitlab的CI系统和supervisor，进行微服务的自动化部署。</p>
+<h2 id="CI"><a href="#CI" class="headerlink" title="CI"></a>CI</h2><p>持续集成的重要性不用多说，能够显著提高开发、部署和运维效率，但非侵入式的持续集成架构是很难的，此处分享我们在小型的开发团队中采用的持续集成方案。</p>
+<h3 id="Gitlab"><a href="#Gitlab" class="headerlink" title="Gitlab"></a>Gitlab</h3><p>我们采用自建gitlab进行代码版本管理，通过docker进行搭建极其容易。目前的gitlab CI系统已经非常完善，可以针对特定的代码分支执行持续集成任务。</p>
+<p>怎样安装gitlab-ci-runner参考<a href="/2016/05/28/gitlab-ci-runner/">这篇文章</a></p>
+<h3 id="Supervisor"><a href="#Supervisor" class="headerlink" title="Supervisor"></a>Supervisor</h3><p>测试环境采用supervisor进行进程监控，保证应用挂掉之后能重启，且能正常的杀掉老的进程。</p>
+<h2 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h2><p>以目前实现的一个监控组件monitor作为示例，分享怎样实现持续集成。</p>
+<p>monitor是一个标准的micro服务，假设代码存放目录为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$GOPATH/src/git.domain.com/micro/monitor</div></pre></td></tr></table></figure>
+<p>monitor的代码目录如下</p>
+<p> <img src="/images/micro-monitor-code.jpg" alt="micro-monitor-code"></p>
+<p>其中与部署相关的是两个文件</p>
+<p><code>.gitlab-ci.yml</code>是一个名字固定的文件，gitlab会根据这个文件名，来找到这个文件，将其中的内容根据分支设定，发送给runner执行，比如我们的文件内容是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">develop:</div><div class="line">    script:</div><div class="line">    - &apos;cd $&#123;GOPATH&#125;/src/git.xxx.com/micro/monitor  //进入代码目录</div><div class="line">    &amp;&amp; git pull &amp;&amp; git checkout develop &amp;&amp; go build  //更新代码、切换到develop分支、编译</div><div class="line">    &amp;&amp; mkdir -p logs  //创建logs文件夹</div><div class="line">    &amp;&amp; supervisorctl -c ../../supervisord.conf update  //更新supervisor配置文件</div><div class="line">    &amp;&amp; supervisorctl -c ../../supervisord.conf restart monitor //重启服务</div><div class="line">    tags:</div><div class="line">      - micro   //将任务分发给有micro这个tag的runner执行</div><div class="line">    only:</div><div class="line">      - develop   //只监听develop分支</div></pre></td></tr></table></figure>
+<p>注意，文件里的GOPATH是一个变量，这个变量在gitlab后台的monitor工程中设置，它是全局的，不用每个工程都设置，在某个工程设置一次即可。</p>
+<p>具体参考<a href="/2016/05/28/gitlab-ci-runner/">这篇文章</a></p>
+<p><code>`supervisord.conf</code>是supervisor的配置文件，supervisor的安装等等内容请参考<a href="http://supervisord.org/" target="_blank" rel="external">官网</a></p>
+<p>内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[program:monitor]</div><div class="line">directory=%(here)s/micro/%(program_name)s</div><div class="line">environment=RUN_MODE=%(ENV_RUN_MODE)s</div><div class="line">command=%(here)s/micro/%(program_name)s/%(program_name)s</div><div class="line">process_name=%(program_name)s</div><div class="line">autorestart = true</div><div class="line">startretries = 3</div><div class="line">redirect_stderr=true</div><div class="line">stdout_logfile_maxbytes = 20MB</div><div class="line">stdout_logfile_backups = 20</div><div class="line">stdout_logfile=%(here)s/micro/%(program_name)s/logs/%(program_name)s.log</div></pre></td></tr></table></figure>
+<p>内容很简单，就是进去某个设定好的目录，执行某个命令。</p>
+<p>实际效果：</p>
+<p><img src="/images/ci-01.jpg" alt="micro-monitor-code"></p>
+<p><img src="/images/ci-02.jpg" alt="micro-monitor-code"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本质上就是gitlab+supervisor的组合，需要一些细节的设计，开发的项目需要增加两个文件。部署的服务器需要设计好路径结构，否则可能会找不到文件。实际操作过程中有疑问欢迎给我发邮件。自动化部署如果想要运行起来，还需要另一个方面的配合 — 不同环境的配置文件问题，本地环境、开发环境、测试环境、生产环境的配置大部分情况下都不一样，怎样智能的读取响应环境的配置文件？这个问题我们也有自己的解决方案，在接下来的文章中我会进一步说明。</p>
+
+    
+  </div>
+  
+    
+<div class="share_jia">
+   <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">
+            分享到: &nbsp;
+        </span>
+<a class="jiathis_button_tsina"></a>
+<a class="jiathis_button_weixin"></a>
+<a class="jiathis_button_evernote"></a>
+<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+</div>
+
+  
+
+</article>
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'gogap';
+    
+    var disqus_url = 'http://gogap.cn/2016/05/30/deploy-micro/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
+
+
+
+    
+
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

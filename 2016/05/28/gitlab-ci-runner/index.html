@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>怎样使用gitlab-ci-runner | Gogap</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="CI," />
+  
+
+  <meta name="description" content="这篇文件简单介绍，怎样安装使用gitlab-ci-runner，执行持续集成任务。 介绍gitlab-ci-runner是gitlab官方出品的持续集成工具，简单来说就是当你的代码触发了某个持续集成任务，运行在主机上的gitlab-ci-runner就会执行预先设计好的脚本。比如我们设计好，某个项目的develop分支有更新时，发送一段脚本到runner，这段事先写好的脚本，主要工作是进入这个项目">
+<meta name="keywords" content="CI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="怎样使用gitlab-ci-runner">
+<meta property="og:url" content="http://gogap.cn/2016/05/28/gitlab-ci-runner/index.html">
+<meta property="og:site_name" content="Gogap">
+<meta property="og:description" content="这篇文件简单介绍，怎样安装使用gitlab-ci-runner，执行持续集成任务。 介绍gitlab-ci-runner是gitlab官方出品的持续集成工具，简单来说就是当你的代码触发了某个持续集成任务，运行在主机上的gitlab-ci-runner就会执行预先设计好的脚本。比如我们设计好，某个项目的develop分支有更新时，发送一段脚本到runner，这段事先写好的脚本，主要工作是进入这个项目">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-01.jpg">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-02.jpg">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-03.jpg">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-04.jpg">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-05.jpg">
+<meta property="og:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-06.jpg">
+<meta property="og:updated_time" content="2017-09-19T06:23:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="怎样使用gitlab-ci-runner">
+<meta name="twitter:description" content="这篇文件简单介绍，怎样安装使用gitlab-ci-runner，执行持续集成任务。 介绍gitlab-ci-runner是gitlab官方出品的持续集成工具，简单来说就是当你的代码触发了某个持续集成任务，运行在主机上的gitlab-ci-runner就会执行预先设计好的脚本。比如我们设计好，某个项目的develop分支有更新时，发送一段脚本到runner，这段事先写好的脚本，主要工作是进入这个项目">
+<meta name="twitter:image" content="http://gogap.cn/images/gitlab-ci-multi-runner-01.jpg">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#介绍"><span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接"><span class="toc-text">连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#注册runner"><span class="toc-text">注册runner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#激活runner"><span class="toc-text">激活runner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行runner"><span class="toc-text">运行runner</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为项目绑定runner"><span class="toc-text">为项目绑定runner</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置runner变量"><span class="toc-text">设置runner变量</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-gitlab-ci-runner" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">怎样使用gitlab-ci-runner</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2016.05.28</span>
+      </span>
+
+       
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>lubia</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/CI/">CI</a>
+  </span>
+
+
+
+      
+
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>这篇文件简单介绍，怎样安装使用gitlab-ci-runner，执行持续集成任务。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>gitlab-ci-runner是gitlab官方出品的持续集成工具，简单来说就是当你的代码触发了某个持续集成任务，运行在主机上的gitlab-ci-runner就会执行预先设计好的脚本。比如我们设计好，某个项目的develop分支有更新时，发送一段脚本到runner，这段事先写好的脚本，主要工作是进入这个项目的目录，git pull，编译，重启。这样就你只是推送了代码，但已经实现了简单的自动化部署。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>官方的安装文档在这里，非常简单，因为runner是采用golang编写的，所以你本质上只是下载了一个可执行文件，没有任何依赖项。按照你的平台选择即可：</p>
+<p><a href="https://gitlab.com/gitlab-org/gitlab-ci-multi-runner" target="_blank" rel="external">https://gitlab.com/gitlab-org/gitlab-ci-multi-runner</a></p>
+<p>不必多说。</p>
+<p>注：gitlab-ci-multi-runner和gitlab-ci-runner就是一个东西，两个名字而已。</p>
+<h2 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h2><p>安装好以后，运行起来的效果应该类似这样</p>
+<p><img src="/images/gitlab-ci-multi-runner-01.jpg" alt=""></p>
+<p>注意，接下来的命令不要使用sudo，在linux环境下，如果使用sudo，在执行任务时会带来权限上的问题。</p>
+<h3 id="注册runner"><a href="#注册runner" class="headerlink" title="注册runner"></a>注册runner</h3><p>接下来执行<code>gitlab-ci-multi-runner register</code>，进入交互式的页面，依次输入各个参数即可</p>
+<p><img src="/images/gitlab-ci-multi-runner-02.jpg" alt=""></p>
+<h3 id="激活runner"><a href="#激活runner" class="headerlink" title="激活runner"></a>激活runner</h3><p>执行<code>gitlab-ci-multi-runner verify</code></p>
+<p><img src="/images/gitlab-ci-multi-runner-03.jpg" alt=""></p>
+<h3 id="运行runner"><a href="#运行runner" class="headerlink" title="运行runner"></a>运行runner</h3><p>执行<code>gitlab-ci-multi-runner run &amp;</code></p>
+<p>此时runner就已经运行起来，等待着gitlab发送任务。</p>
+<p>此时在gitlab后台的runner页面中应该可以看到绑定成功的runner</p>
+<p> <img src="/images/gitlab-ci-multi-runner-04.jpg" alt=""></p>
+<h2 id="为项目绑定runner"><a href="#为项目绑定runner" class="headerlink" title="为项目绑定runner"></a>为项目绑定runner</h2><p>在gitlab进入某个需要进行持续集成的项目目录，<code>setting &gt; runners</code></p>
+<p>为这个项目绑定runner，<code>ENABLE FOR THIS PROJECT</code></p>
+<p><img src="/images/gitlab-ci-multi-runner-05.jpg" alt=""></p>
+<h2 id="设置runner变量"><a href="#设置runner变量" class="headerlink" title="设置runner变量"></a>设置runner变量</h2><p>在某个项目的<code>setting &gt; variables</code>中，设置全局变量，注意这里设置的变量，所有项目都可以读取到。</p>
+<p><img src="/images/gitlab-ci-multi-runner-06.jpg" alt=""></p>
+
+    
+  </div>
+  
+    
+<div class="share_jia">
+   <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">
+            分享到: &nbsp;
+        </span>
+<a class="jiathis_button_tsina"></a>
+<a class="jiathis_button_weixin"></a>
+<a class="jiathis_button_evernote"></a>
+<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+</div>
+
+  
+
+</article>
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'gogap';
+    
+    var disqus_url = 'http://gogap.cn/2016/05/28/gitlab-ci-runner/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
+
+
+
+    
+
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

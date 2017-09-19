@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>使用Go Micro编写微服务 | Gogap</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Micro," />
+  
+
+  <meta name="description" content="这是一系列介绍Micro框架的文章的第三篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 这是一个高等级的说明：怎样使用go-micro来编写微服务，如果你想学习更多微服务的知识以及Micro的整体架构，参考以前的文章。 什么是Go Micro?Go Micro是一个插件化的基础框架，基于此可以构建微服务。Micro的设计哲学是『可插拔』的插件化架构。在架构之外，它默认实现了con">
+<meta name="keywords" content="Micro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Go Micro编写微服务">
+<meta property="og:url" content="http://gogap.cn/2016/03/28/go-micro/index.html">
+<meta property="og:site_name" content="Gogap">
+<meta property="og:description" content="这是一系列介绍Micro框架的文章的第三篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 这是一个高等级的说明：怎样使用go-micro来编写微服务，如果你想学习更多微服务的知识以及Micro的整体架构，参考以前的文章。 什么是Go Micro?Go Micro是一个插件化的基础框架，基于此可以构建微服务。Micro的设计哲学是『可插拔』的插件化架构。在架构之外，它默认实现了con">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-09-19T06:23:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用Go Micro编写微服务">
+<meta name="twitter:description" content="这是一系列介绍Micro框架的文章的第三篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 这是一个高等级的说明：怎样使用go-micro来编写微服务，如果你想学习更多微服务的知识以及Micro的整体架构，参考以前的文章。 什么是Go Micro?Go Micro是一个插件化的基础框架，基于此可以构建微服务。Micro的设计哲学是『可插拔』的插件化架构。在架构之外，它默认实现了con">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是Go-Micro"><span class="toc-text">什么是Go Micro?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么是Go-Micro"><span class="toc-text">为什么是Go Micro?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写一个服务"><span class="toc-text">编写一个服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#初始化"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定义API"><span class="toc-text">定义API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#生成API接口"><span class="toc-text">生成API接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现handler"><span class="toc-text">实现handler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行服务"><span class="toc-text">运行服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#完整的服务端"><span class="toc-text">完整的服务端</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写客户端"><span class="toc-text">编写客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-go-micro" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">使用Go Micro编写微服务</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2016.03.28</span>
+      </span>
+
+       
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>lubia</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/微服务/">微服务</a>
+  </span>
+
+
+
+      
+
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>这是一系列介绍<a href="http://github.com/micro" target="_blank" rel="external">Micro</a>框架的文章的第三篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。</p>
+<p>这是一个高等级的说明：怎样使用<a href="https://github.com/micro/go-micro" target="_blank" rel="external"><strong>go-micro</strong></a>来编写微服务，如果你想学习更多微服务的知识以及Micro的整体架构，参考以前的文章。</p>
+<h2 id="什么是Go-Micro"><a href="#什么是Go-Micro" class="headerlink" title="什么是Go Micro?"></a>什么是Go Micro?</h2><p><a href="https://github.com/micro/go-micro" target="_blank" rel="external"><strong>Go Micro</strong></a>是一个插件化的基础框架，基于此可以构建微服务。Micro的设计哲学是『可插拔』的插件化架构。在架构之外，它默认实现了consul作为服务发现，通过http进行通信，通过protobuf和json进行编解码。我们一步步深入下去。</p>
+<p>Go Micro是：</p>
+<ol>
+<li>一个用Golang编写的包</li>
+<li>一系列插件化的接口定义</li>
+<li>基于RPC</li>
+</ol>
+<p>Go Micro为下面的模块定义了接口：</p>
+<ol>
+<li>服务发现</li>
+<li>编解码</li>
+<li>服务端、客户端</li>
+<li>订阅、发布消息</li>
+</ol>
+<p>更详细的说明可以在<a href="https://blog.micro.mu/2016/03/20/micro.html#go-micro" target="_blank" rel="external">这里</a>看到。</p>
+<h2 id="为什么是Go-Micro"><a href="#为什么是Go-Micro" class="headerlink" title="为什么是Go Micro?"></a>为什么是Go Micro?</h2><p>Go Micro从一年多以前开始开发，最初只是个人需求，很快我发现这对那些编写微服务的程序员会有很大的价值。它基于我在不同的技术公司如google和hailo的开发经验编写而成。</p>
+<p>就像前面提到的，Go Micro是一个golang编写的插件化架构，专注于提供底层的接口定义和基础工具。这些接口可以接纳各种实现。比如 <a href="https://godoc.org/github.com/micro/go-micro/registry" target="_blank" rel="external">Registry</a>接口定义了服务发现的接口，默认采用了consul作为服务发现的实现，但也可以采用其他实现比如etcd和zookeeper等，只要能满足接口，就可以使用。</p>
+<p>插件化的架构意味着如果你想替换底层的实现，你不需要修改任何底层的代码。</p>
+<h2 id="编写一个服务"><a href="#编写一个服务" class="headerlink" title="编写一个服务"></a>编写一个服务</h2><p>如果你想直接看代码，看这里：<a href="https://github.com/micro/go-micro/tree/master/examples/service" target="_blank" rel="external">examples/service</a></p>
+<p>顶层的<a href="https://godoc.org/github.com/micro/go-micro#Service" target="_blank" rel="external">Service</a>接口是构建服务的主要组件。它把底层的各个包需要实现的接口，做了一次封装。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Service <span class="keyword">interface</span> &#123;</div><div class="line">    Init(...Option)</div><div class="line">    Options() Options</div><div class="line">    Client() client.Client</div><div class="line">    Server() server.Server</div><div class="line">    Run() error</div><div class="line">    String() <span class="keyword">string</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>一个服务可以这样创建<code>micro.NewService</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> <span class="string">"github.com/micro/go-micro"</span></div><div class="line"></div><div class="line">service := micro.NewService()</div></pre></td></tr></table></figure>
+<p>参数可以在创建时传入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">service := micro.NewService(</div><div class="line">	micro.Name(<span class="string">"greeter"</span>),</div><div class="line">	micro.Version(<span class="string">"latest"</span>),</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>所有可选的参数设置可以在<a href="https://godoc.org/github.com/micro/go-micro#Option" target="_blank" rel="external">这里</a>看到</p>
+<p>Go Micro也提供了读取命令行的方式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"github.com/micro/cli"</span></div><div class="line">	<span class="string">"github.com/micro/go-micro"</span></div><div class="line">)</div><div class="line"></div><div class="line">service := micro.NewService(</div><div class="line">	micro.Flags(</div><div class="line">		cli.StringFlag&#123;</div><div class="line">			Name:  <span class="string">"environment"</span>,</div><div class="line">			Usage: <span class="string">"The environment"</span>,</div><div class="line">		&#125;,</div><div class="line">	)</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>通过 <code>service.Init</code>来解析参数，附加的处理可以通过<code>micro.Action</code>解决</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">service.Init(</div><div class="line">	micro.Action(<span class="function"><span class="keyword">func</span><span class="params">(c *cli.Context)</span></span> &#123;</div><div class="line">		env := c.StringFlag(<span class="string">"environment"</span>)</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(env) &gt; <span class="number">0</span> &#123;</div><div class="line">			fmt.Println(<span class="string">"Environment set to"</span>, env)</div><div class="line">		&#125;</div><div class="line">	&#125;),</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>Go Micro提供了提供了预定义的参数，也会被<code>service.Init</code>解析，<a href="https://godoc.org/github.com/micro/go-micro/cmd#pkg-variables" target="_blank" rel="external">这里</a>可以看到所有的flag</p>
+<h3 id="定义API"><a href="#定义API" class="headerlink" title="定义API"></a>定义API</h3><p>我们使用protobuf文件来定义服务的API，这是一种方便且严格的定义方式，协议将会提供给服务端和客户端。下面是一个协议的例子：greeter.proto</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">syntax = <span class="string">"proto3"</span>;</div><div class="line"></div><div class="line">service Greeter &#123;</div><div class="line">	rpc Hello(HelloRequest) returns (HelloResponse) &#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">message HelloRequest &#123;</div><div class="line">	<span class="keyword">string</span> name = <span class="number">1</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">message HelloResponse &#123;</div><div class="line">	<span class="keyword">string</span> greeting = <span class="number">2</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里定义了一个服务叫做Greeter，它提供一个接口叫Hello，它接受HelloRequest的请求，返回HelloResponse。</p>
+<h3 id="生成API接口"><a href="#生成API接口" class="headerlink" title="生成API接口"></a>生成API接口</h3><p>我们使用<code>protoc</code>和<code>proto-gen-go</code>这两个工具来生成代码，Go Micro也会生成客户端代码，减少工作量，这里需要使用我们fork并修改过的<a href="https://blog.micro.mu/2016/03/28/github.com/micro/protobuf" target="_blank" rel="external">github.com/micro/protobuf</a>，与原始版本的区别是，fork版本能生成客户端代码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">go get github.com/micro/protobuf/&#123;proto,protoc-gen-go&#125;</div><div class="line">protoc --go_out=plugins=micro:. greeter.proto</div></pre></td></tr></table></figure>
+<p>生成的代码可以在handler中引用相应的包进行使用，下面是生成的一部分代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> HelloRequest <span class="keyword">struct</span> &#123;</div><div class="line">	Name <span class="keyword">string</span> <span class="string">`protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> HelloResponse <span class="keyword">struct</span> &#123;</div><div class="line">	Greeting <span class="keyword">string</span> <span class="string">`protobuf:"bytes,2,opt,name=greeting" json:"greeting,omitempty"`</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Client API for Greeter service</span></div><div class="line"></div><div class="line"><span class="keyword">type</span> GreeterClient <span class="keyword">interface</span> &#123;</div><div class="line">	Hello(ctx context.Context, in *HelloRequest, opts ...client.CallOption) (*HelloResponse, error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">type</span> greeterClient <span class="keyword">struct</span> &#123;</div><div class="line">	c           client.Client</div><div class="line">	serviceName <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewGreeterClient</span><span class="params">(serviceName <span class="keyword">string</span>, c client.Client)</span> <span class="title">GreeterClient</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> c == <span class="literal">nil</span> &#123;</div><div class="line">		c = client.NewClient()</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(serviceName) == <span class="number">0</span> &#123;</div><div class="line">		serviceName = <span class="string">"greeter"</span></div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> &amp;greeterClient&#123;</div><div class="line">		c:           c,</div><div class="line">		serviceName: serviceName,</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *greeterClient)</span> <span class="title">Hello</span><span class="params">(ctx context.Context, in *HelloRequest, opts ...client.CallOption)</span> <span class="params">(*HelloResponse, error)</span></span> &#123;</div><div class="line">	req := c.c.NewRequest(c.serviceName, <span class="string">"Greeter.Hello"</span>, in)</div><div class="line">	out := <span class="built_in">new</span>(HelloResponse)</div><div class="line">	err := c.c.Call(ctx, req, out, opts...)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> out, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Server API for Greeter service</span></div><div class="line"></div><div class="line"><span class="keyword">type</span> GreeterHandler <span class="keyword">interface</span> &#123;</div><div class="line">	Hello(context.Context, *HelloRequest, *HelloResponse) error</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">RegisterGreeterHandler</span><span class="params">(s server.Server, hdlr GreeterHandler)</span></span> &#123;</div><div class="line">	s.Handle(s.NewHandler(&amp;Greeter&#123;hdlr&#125;))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="实现handler"><a href="#实现handler" class="headerlink" title="实现handler"></a>实现handler</h3><p>服务端需要注册handler来处理请求，一个handler是一个这样的方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, req <span class="keyword">interface</span>&#123;&#125;, rsp <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span></div></pre></td></tr></table></figure>
+<p>正如上面看到的，一个handler实现了API协议中定义的接口</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> GreeterHandler <span class="keyword">interface</span> &#123;</div><div class="line">        Hello(context.Context, *HelloRequest, *HelloResponse) error</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里是一个Greeter的handler实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> proto <span class="string">"github.com/micro/micro/examples/service/proto"</span></div><div class="line"></div><div class="line"><span class="keyword">type</span> Greeter <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Greeter)</span> <span class="title">Hello</span><span class="params">(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse)</span> <span class="title">error</span></span> &#123;</div><div class="line">	rsp.Greeting = <span class="string">"Hello "</span> + req.Name</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>handler需要注册到某个服务</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">service := micro.NewService(</div><div class="line">	micro.Name(<span class="string">"greeter"</span>),</div><div class="line">)</div><div class="line"></div><div class="line">proto.RegisterGreeterHandler(service.Server(), <span class="built_in">new</span>(Greeter))</div></pre></td></tr></table></figure>
+<h3 id="运行服务"><a href="#运行服务" class="headerlink" title="运行服务"></a>运行服务</h3><p>服务可以直接调用<code>server.Run()</code>来运行，这会让服务监听一个随机端口，这个调用也会让服务将自身注册到注册器，当服务停止运行时，会在注册器注销自己。</p>
+<h3 id="完整的服务端"><a href="#完整的服务端" class="headerlink" title="完整的服务端"></a>完整的服务端</h3><p>greeter.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">        <span class="string">"log"</span></div><div class="line"></div><div class="line">        <span class="string">"github.com/micro/go-micro"</span></div><div class="line">        proto <span class="string">"github.com/micro/go-micro/examples/service/proto"</span></div><div class="line"></div><div class="line">        <span class="string">"golang.org/x/net/context"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">type</span> Greeter <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Greeter)</span> <span class="title">Hello</span><span class="params">(ctx context.Context, req *proto.HelloRequest, rsp *proto.HelloResponse)</span> <span class="title">error</span></span> &#123;</div><div class="line">        rsp.Greeting = <span class="string">"Hello "</span> + req.Name</div><div class="line">        <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">        service := micro.NewService(</div><div class="line">                micro.Name(<span class="string">"greeter"</span>),</div><div class="line">                micro.Version(<span class="string">"latest"</span>),</div><div class="line">        )</div><div class="line"></div><div class="line">        service.Init()</div><div class="line"></div><div class="line">        proto.RegisterGreeterHandler(service.Server(), <span class="built_in">new</span>(Greeter))</div><div class="line"></div><div class="line">        <span class="keyword">if</span> err := service.Run(); err != <span class="literal">nil</span> &#123;</div><div class="line">                log.Fatal(err)</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意，服务发现机制需要首先运行起来，这样服务才能注册到注册器中，才能被客户端发现，<a href="https://github.com/micro/go-micro#getting-started" target="_blank" rel="external">这里</a>有一个简单的介绍。</p>
+<h2 id="编写客户端"><a href="#编写客户端" class="headerlink" title="编写客户端"></a>编写客户端</h2><p> <a href="https://godoc.org/github.com/micro/go-micro/client" target="_blank" rel="external">client</a> 包用于向服务端发起请求，当你创建一个服务，客户端可以调用的接口已经自动生成了</p>
+<p>调用上面的服务可以用下面的客户端代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/ create the greeter client using the service name and client</div><div class="line">greeter := proto.NewGreeterClient(<span class="string">"greeter"</span>, service.Client())</div><div class="line"></div><div class="line"><span class="comment">// request the Hello method on the Greeter handler</span></div><div class="line">rsp, err := greeter.Hello(context.TODO(), &amp;proto.HelloRequest&#123;</div><div class="line">	Name: <span class="string">"John"</span>,</div><div class="line">&#125;)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	fmt.Println(err)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line">fmt.Println(rsp.Greeter)</div></pre></td></tr></table></figure>
+<p><code>proto.NewGreeterClient</code>就是我们刚才生成的代码，根据服务名称发送请求。</p>
+<p>完整的示例可以在这里看到：<a href="https://github.com/micro/go-micro/tree/master/examples/service" target="_blank" rel="external">go-micro/examples/service</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇文章是一个高等级的使用说明，介绍了怎样编写客户端和服务端代码，你可以在这里看到更多示例代码：<a href="https://github.com/micro" target="_blank" rel="external">github.com/micro</a></p>
+<p>如果你想了解更多，请看这个<a href="https://blog.micro.mu/" target="_blank" rel="external">blog</a>，或者这个<a href="https://github.com/micro/micro" target="_blank" rel="external">repo</a>，Twitter可以关注<a href="https://twitter.com/microhq" target="_blank" rel="external">@MicroHQ</a>，Slack社区在<a href="http://slack.micro.mu/" target="_blank" rel="external">这里</a></p>
+
+    
+  </div>
+  
+    
+<div class="share_jia">
+   <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">
+            分享到: &nbsp;
+        </span>
+<a class="jiathis_button_tsina"></a>
+<a class="jiathis_button_weixin"></a>
+<a class="jiathis_button_evernote"></a>
+<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+	data_track_clickback:true,
+	summary:"",
+	shortUrl:false,
+	hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+</div>
+
+  
+
+</article>
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'gogap';
+    
+    var disqus_url = 'http://gogap.cn/2016/03/28/go-micro/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
+
+
+
+    
+
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>
