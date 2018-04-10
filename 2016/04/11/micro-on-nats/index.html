@@ -1,19 +1,103 @@
 <!DOCTYPE html>
 
 
-  <html class="light page-post">
+
+  
 
 
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  
-  <title>基于消息队列NATS构建微服务 | Gogap</title>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
 
   
-    <meta name="keywords" content="Micro," />
-  
+
+
+
 
   <meta name="description" content="这是一系列介绍Micro框架的文章的第四篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 这篇文章我们会讨论基于NATS使用Micro。讨论包括了服务发现，同步通信和异步通信。如果需要了解Micro，请翻看以前的文章。 NATS是什么?NATS是一个开源的消息系统，或者说消息队列。NATS的作者是Derek Collison， Apcera的作者。它起源于VMWare，最开始是一个">
 <meta name="keywords" content="Micro">
@@ -36,162 +120,272 @@
 <meta name="twitter:description" content="这是一系列介绍Micro框架的文章的第四篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 这篇文章我们会讨论基于NATS使用Micro。讨论包括了服务发现，同步通信和异步通信。如果需要了解Micro，请翻看以前的文章。 NATS是什么?NATS是一个开源的消息系统，或者说消息队列。NATS的作者是Derek Collison， Apcera的作者。它起源于VMWare，最开始是一个">
 <meta name="twitter:image" content="https://blog.micro.mu/assets/images/request-response.png">
 
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
 
 
-  
-    <link rel="stylesheet" href="/css/personal-style.css">
+  <link rel="alternate" href="/atom.xml" title="Gogap" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://gogap.cn/2016/04/11/micro-on-nats/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>基于消息队列NATS构建微服务 | Gogap</title>
   
 
-  
 
-  
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
 
 </head>
 
-<body>
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+    
   
 
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Gogap</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
       
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
+        <p class="site-subtitle"></p>
       
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
   </div>
 
-
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NATS是什么"><span class="toc-text">NATS是什么?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么是NATS"><span class="toc-text">为什么是NATS?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Micro-on-NATS"><span class="toc-text">Micro on NATS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transport"><span class="toc-text">Transport</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Broker"><span class="toc-text">Broker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Register"><span class="toc-text">Register</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#大规模在Micro中使用NATS"><span class="toc-text">大规模在Micro中使用NATS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
-  </div>
 
 
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
 
-<div class="content content-post CENTER">
-   <article id="post-micro-on-nats" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">基于消息队列NATS构建微服务</h1>
+      
+        
+        
+          
+  
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
 
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2016.04.11</span>
-      </span>
-
-       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>lubia</span>
-        </span>
       
 
       
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/微服务/">微服务</a>
-  </span>
-
-
-
       
+    </ul>
+  
 
-    </div>
-  </header>
+  
 
-  <div class="article-content">
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
     
-      <p>这是一系列介绍<a href="http://github.com/micro" target="_blank" rel="external">Micro</a>框架的文章的第四篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。</p>
-<p>这篇文章我们会讨论基于<a href="http://nats.io/" target="_blank" rel="external"><strong>NATS</strong></a>使用<a href="https://github.com/micro/micro" target="_blank" rel="external"><strong>Micro</strong></a>。讨论包括了服务发现，同步通信和异步通信。如果需要了解Micro，请翻看以前的文章。</p>
-<h2 id="NATS是什么"><a href="#NATS是什么" class="headerlink" title="NATS是什么?"></a>NATS是什么?</h2><p><a href="http://nats.io/" target="_blank" rel="external"><strong>NATS</strong></a>是一个开源的消息系统，或者说消息队列。NATS的作者是Derek Collison， <a href="https://www.apcera.com/" target="_blank" rel="external">Apcera</a>的作者。它起源于VMWare，最开始是一个ruby的系统。后来使用golang进行重写，逐步的成为了一个高扩展性的高性能消息系统。</p>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://gogap.cn/2016/04/11/micro-on-nats/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Gogap">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Gogap">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于消息队列NATS构建微服务</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-11T15:21:35+08:00">2016-04-11</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/微服务/" itemprop="url" rel="index"><span itemprop="name">微服务</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/04/11/micro-on-nats/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2016/04/11/micro-on-nats/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一系列介绍<a href="http://github.com/micro" target="_blank" rel="noopener">Micro</a>框架的文章的第四篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。</p>
+<p>这篇文章我们会讨论基于<a href="http://nats.io/" target="_blank" rel="noopener"><strong>NATS</strong></a>使用<a href="https://github.com/micro/micro" target="_blank" rel="noopener"><strong>Micro</strong></a>。讨论包括了服务发现，同步通信和异步通信。如果需要了解Micro，请翻看以前的文章。</p>
+<h2 id="NATS是什么"><a href="#NATS是什么" class="headerlink" title="NATS是什么?"></a>NATS是什么?</h2><p><a href="http://nats.io/" target="_blank" rel="noopener"><strong>NATS</strong></a>是一个开源的消息系统，或者说消息队列。NATS的作者是Derek Collison， <a href="https://www.apcera.com/" target="_blank" rel="noopener">Apcera</a>的作者。它起源于VMWare，最开始是一个ruby的系统。后来使用golang进行重写，逐步的成为了一个高扩展性的高性能消息系统。</p>
 <h2 id="为什么是NATS"><a href="#为什么是NATS" class="headerlink" title="为什么是NATS?"></a>为什么是NATS?</h2><p>为什么不是呢?过去我使用过很多消息队列，很明显NATS是鹤立鸡群的，在过去消息系统似乎成了企业的灵丹妙药了，结果是每个人参与的每个系统都离不开消息系统。导致了很多无效的承诺、高昂的研发投入，制造出比它解决的更多的麻烦。</p>
 <p>NATS，相比之下，就十分专注，在难以置信的简洁之下，解决了性能问题，解决了高可用行问题。它的口号是『always on and available』，使用了一种『fire and forget』的消息模式。它简单、专注、轻量的特性使它在微服务的候选中脱颖而出。我们相信，在服务间的消息传递领域，它很快会变成主要的候选者。</p>
 <p>NATS能提供什么?</p>
@@ -214,8 +408,8 @@
 <li>Enterprise queueing</li>
 </ul>
 <p>NATS是否适合Micro呢？我们接着讨论</p>
-<h2 id="Micro-on-NATS"><a href="#Micro-on-NATS" class="headerlink" title="Micro on NATS"></a>Micro on NATS</h2><p><a href="https://github.com/micro/micro" target="_blank" rel="external"><strong>Micro</strong></a> 采用插件化的架构设计，用户可以替换底层的实现，而不更改任何底层的代码。每个<a href="https://github.com/micro/go-micro" target="_blank" rel="external"><strong>Go-Micro</strong></a>框架的底层模块定义了相应的接口， <a href="https://godoc.org/github.com/micro/go-micro/registry#Registry" target="_blank" rel="external">registry</a> 是作为服务发现，<a href="https://godoc.org/github.com/micro/go-micro/transport#Transport" target="_blank" rel="external">transport</a>作为同步通信， <a href="https://godoc.org/github.com/micro/go-micro/broker#Broker" target="_blank" rel="external">broker</a>作为异步通信。</p>
-<p>为每个组件创建一个插件很简单，只需要实现这些组件的接口即可。我们会在未来的文章里详细讨论，怎样写插件，如果你想详细了解NATS的插件或者其他的类似etcd作为服务发现，kafka作异步通信，rabbitmq作同步通信，在这里可以看到： <a href="https://github.com/micro/go-plugins" target="_blank" rel="external">github.com/micro/go-plugins</a></p>
+<h2 id="Micro-on-NATS"><a href="#Micro-on-NATS" class="headerlink" title="Micro on NATS"></a>Micro on NATS</h2><p><a href="https://github.com/micro/micro" target="_blank" rel="noopener"><strong>Micro</strong></a> 采用插件化的架构设计，用户可以替换底层的实现，而不更改任何底层的代码。每个<a href="https://github.com/micro/go-micro" target="_blank" rel="noopener"><strong>Go-Micro</strong></a>框架的底层模块定义了相应的接口， <a href="https://godoc.org/github.com/micro/go-micro/registry#Registry" target="_blank" rel="noopener">registry</a> 是作为服务发现，<a href="https://godoc.org/github.com/micro/go-micro/transport#Transport" target="_blank" rel="noopener">transport</a>作为同步通信， <a href="https://godoc.org/github.com/micro/go-micro/broker#Broker" target="_blank" rel="noopener">broker</a>作为异步通信。</p>
+<p>为每个组件创建一个插件很简单，只需要实现这些组件的接口即可。我们会在未来的文章里详细讨论，怎样写插件，如果你想详细了解NATS的插件或者其他的类似etcd作为服务发现，kafka作异步通信，rabbitmq作同步通信，在这里可以看到： <a href="https://github.com/micro/go-plugins" target="_blank" rel="noopener">github.com/micro/go-plugins</a></p>
 <p>Micro on NATS本质上是实现一系列的插件，将NATS消息系统整合到Micro的框架中来。通过为Go Micro提供不同的插件，我们可以创造出很多灵活的组合。</p>
 <p>在实践过程中，不能一套系统打天下，Micro on NATS的可以灵活的定义各种模型。</p>
 <p>下面我们会讨论一下NATS插件怎样在transport，broker和registry下工作。</p>
@@ -228,27 +422,27 @@
 <p><img src="https://blog.micro.mu/assets/images/nats-transport.png" alt=""></p>
 <p>使用transport插件</p>
 <p>引用插件</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/transport/nats"</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/transport/nats"</span></span><br></pre></td></tr></table></figure>
 <p>启动时传入参数</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --transport=nats --transport_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --transport=nats --transport_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></span><br></pre></td></tr></table></figure>
 <p>或者直接在代码中创建</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">transport := nats.NewTransport()</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transport := nats.NewTransport()</span><br></pre></td></tr></table></figure>
 <p>go-micro的transport接口：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Transport <span class="keyword">interface</span> &#123;</div><div class="line">    Dial(addr <span class="keyword">string</span>, opts ...DialOption) (Client, error)</div><div class="line">    Listen(addr <span class="keyword">string</span>, opts ...ListenOption) (Listener, error)</div><div class="line">    String() <span class="keyword">string</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Transport <span class="keyword">interface</span> &#123;</span><br><span class="line">    Dial(addr <span class="keyword">string</span>, opts ...DialOption) (Client, error)</span><br><span class="line">    Listen(addr <span class="keyword">string</span>, opts ...ListenOption) (Listener, error)</span><br><span class="line">    String() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a>Broker</h2><p><img src="https://blog.micro.mu/assets/images/pub-sub.png" alt=""></p>
 <p>broke是go-micro的异步通信接口，它定义了泛型的、高等级的通用接口。NATS本身作为消息系统，是可以作为消息broker的。这里只有一个警告：nats并不持久化消息。虽然在某些场景有风险，但我们相信NATS可以也应该用于go-micro的broker。持久化并不是必须的，它提供了高扩展的发布和订阅架构。</p>
 <p>NATS通过Topics和Channels的理念，非常直接的实现了发布和订阅机制。这里并没有其他工作需要做。消息可以被发布到任何异步的fire and forget manner。通过NATS的Queue Group，订阅方可以通过channel的名字就行订阅。实现消息自动的分发的多个订阅者。</p>
 <p><img src="https://blog.micro.mu/assets/images/nats-broker.png" alt=""></p>
 <p>使用broker插件</p>
 <p>引入包</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/broker/nats"</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/broker/nats"</span></span><br></pre></td></tr></table></figure>
 <p>(译注：注意此时引用的是broker中的nats包，上面引用的是transport中的nats包)</p>
 <p>通过参数启动</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --broker=nats --broker_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --broker=nats --broker_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></span><br></pre></td></tr></table></figure>
 <p>也可以直接启动</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">broker := nats.NewBroker()</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">broker := nats.NewBroker()</span><br></pre></td></tr></table></figure>
 <p>go-micro的broker需要实现的接口：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Broker <span class="keyword">interface</span> &#123;</div><div class="line">    Options() Options</div><div class="line">    Address() <span class="keyword">string</span></div><div class="line">    Connect() error</div><div class="line">    Disconnect() error</div><div class="line">    Init(...Option) error</div><div class="line">    Publish(<span class="keyword">string</span>, *Message, ...PublishOption) error</div><div class="line">    Subscribe(<span class="keyword">string</span>, Handler, ...SubscribeOption) (Subscriber, error)</div><div class="line">    String() <span class="keyword">string</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Broker <span class="keyword">interface</span> &#123;</span><br><span class="line">    Options() Options</span><br><span class="line">    Address() <span class="keyword">string</span></span><br><span class="line">    Connect() error</span><br><span class="line">    Disconnect() error</span><br><span class="line">    Init(...Option) error</span><br><span class="line">    Publish(<span class="keyword">string</span>, *Message, ...PublishOption) error</span><br><span class="line">    Subscribe(<span class="keyword">string</span>, Handler, ...SubscribeOption) (Subscriber, error)</span><br><span class="line">    String() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="Register"><a href="#Register" class="headerlink" title="Register"></a>Register</h2><p><img src="https://blog.micro.mu/assets/images/service-discovery.png" alt=""></p>
 <p>注册器是go-micro定义的服务发现接口，你也许想过。用消息系统做服务发现？这能工作吗？事实上它不仅能工作，还工作的很好。许多人在服务发现中使用消息系统，避免了不一致的发现机制。这是因为消息队列通过topics和channels实现了路由，Topics定义为服务的名字可以作为路由的key，订阅topics的服务自动实现了负载均衡。</p>
 <p>Go-micro把服务发现和传输机制看做两个不同的领域，任何时候，客户端向服务发起请求，都会首先在注册器中根据服务的名字查询到正在运行的服务节点，然后客户端通过transport与节点进行通信。</p>
@@ -266,14 +460,14 @@
 <p><img src="https://blog.micro.mu/assets/images/nats-registry.png" alt=""></p>
 <p>使用register插件</p>
 <p>引入包</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/registry/nats"</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/registry/nats"</span></span><br></pre></td></tr></table></figure>
 <p>通过参数启动</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --registry=nats --registry_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --registry=nats --registry_address=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">4222</span></span><br></pre></td></tr></table></figure>
 <p>或者直接在代码中设置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">registry := nats.NewRegistry()</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">registry := nats.NewRegistry()</span><br></pre></td></tr></table></figure>
 <p>go-micro中的register接口</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Registry <span class="keyword">interface</span> &#123;</div><div class="line">    Register(*Service, ...RegisterOption) error</div><div class="line">    Deregister(*Service) error</div><div class="line">    GetService(<span class="keyword">string</span>) ([]*Service, error)</div><div class="line">    ListServices() ([]*Service, error)</div><div class="line">    Watch() (Watcher, error)</div><div class="line">    String() <span class="keyword">string</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="大规模在Micro中使用NATS"><a href="#大规模在Micro中使用NATS" class="headerlink" title="大规模在Micro中使用NATS"></a>大规模在Micro中使用NATS</h2><p>在上面的例子中，我们只是用了单个的NATS服务，但是在实际情况下，我们一般都是使用NATS集群来实现高可用和容错。你可以在<a href="http://nats.io/documentation/server/gnatsd-cluster/" target="_blank" rel="external">这里</a>看看更多NATS集群的知识。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Registry <span class="keyword">interface</span> &#123;</span><br><span class="line">    Register(*Service, ...RegisterOption) error</span><br><span class="line">    Deregister(*Service) error</span><br><span class="line">    GetService(<span class="keyword">string</span>) ([]*Service, error)</span><br><span class="line">    ListServices() ([]*Service, error)</span><br><span class="line">    Watch() (Watcher, error)</span><br><span class="line">    String() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="大规模在Micro中使用NATS"><a href="#大规模在Micro中使用NATS" class="headerlink" title="大规模在Micro中使用NATS"></a>大规模在Micro中使用NATS</h2><p>在上面的例子中，我们只是用了单个的NATS服务，但是在实际情况下，我们一般都是使用NATS集群来实现高可用和容错。你可以在<a href="http://nats.io/documentation/server/gnatsd-cluster/" target="_blank" rel="noopener">这里</a>看看更多NATS集群的知识。</p>
 <p>Micro 在启动时可以接收一系列的参数，如环境变量等。如果直接使用client的库，也可以在创建时指定参数。</p>
 <p>在目前云计算的架构下，我们过去的经验是，每个AZ都应该有集群。大部分的云计算公司，不同的AZ之间的延迟大概是3到5毫秒，集群的通信是没有任何问题的。当我们运行一个高可用的配置，你的系统必须要能在AZ宕机、甚至整个region崩溃时还能提供服务。我们不建议跨region部署集群。理想的高等级工具应该是用于管理多集群和多region系统。</p>
 <p>Micro是一个极其灵活的微服务系统，它本身就被设计成运行在任何配置的任何地方。整个Micro世界是通过服务发现进行指导，服务的集群可以运行在机器集群中，AZ或者regions。再考虑到NATS集群，它可以让你构建高可用的服务。</p>
@@ -281,204 +475,508 @@
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>NATS是一个高可用和高性能的消息系统，在我们的微服务生态系统中运行的很好。它与Micro配合的非常的好，我们可以把它用在register，transport，broker中，我们也已经全部实现了这些插件。</p>
 <p>NATS在Micro中的使用只是一个示例，它展示了Micro高度的插件化架构，每个go-micro的包都可以被替换，底层不需要改动代码，上层也只需要改动非常少的代码。在未来我们还会看到更多的Micro on X，下一个可能是Micro on kubernetes。</p>
 <p>希望这可以鼓励你来使用Micro on NATS,或者编写自己的插件并回馈给社区。</p>
-<p>在这里看更多的NATS插件<a href="https://github.com/micro/go-plugins" target="_blank" rel="external">github.com/micro/go-plugins</a></p>
-<p>如果你想了解更多，请看这个<a href="https://blog.micro.mu/" target="_blank" rel="external">blog</a>，或者这个<a href="https://github.com/micro/micro" target="_blank" rel="external">repo</a>，Twitter可以关注<a href="https://twitter.com/microhq" target="_blank" rel="external">@MicroHQ</a>，Slack社区在<a href="http://slack.micro.mu/" target="_blank" rel="external">这里</a></p>
+<p>在这里看更多的NATS插件<a href="https://github.com/micro/go-plugins" target="_blank" rel="noopener">github.com/micro/go-plugins</a></p>
+<p>如果你想了解更多，请看这个<a href="https://blog.micro.mu/" target="_blank" rel="noopener">blog</a>，或者这个<a href="https://github.com/micro/micro" target="_blank" rel="noopener">repo</a>，Twitter可以关注<a href="https://twitter.com/microhq" target="_blank" rel="noopener">@MicroHQ</a>，Slack社区在<a href="http://slack.micro.mu/" target="_blank" rel="noopener">这里</a></p>
+
+      
+    </div>
 
     
+      
+
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/05/30/deploy-micro/" rel="bookmark">怎样自动化部署微服务</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/03/28/go-micro/" rel="bookmark">使用Go Micro编写微服务</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/03/17/introduction/" rel="bookmark">Micro - 微服务生态系统</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/04/18/micro-architecture/" rel="bookmark">Micro的架构与微服务的设计模式</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/06/01/micro-research-node-communicate/" rel="bookmark">Micro - 服务间的通讯浅析</a></div>
+      
+    </li>
+  
+  </ul>
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Micro/" rel="tag"># Micro</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/28/go-micro/" rel="next" title="使用Go Micro编写微服务">
+                <i class="fa fa-chevron-left"></i> 使用Go Micro编写微服务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/18/micro-architecture/" rel="prev" title="Micro的架构与微服务的设计模式">
+                Micro的架构与微服务的设计模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
-    
-<div class="share_jia">
-   <!-- JiaThis Button BEGIN -->
-<div class="jiathis_style">
-<span class="jiathis_txt">
-            分享到: &nbsp;
-        </span>
-<a class="jiathis_button_tsina"></a>
-<a class="jiathis_button_weixin"></a>
-<a class="jiathis_button_evernote"></a>
-<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
-</div>
-<script type="text/javascript" >
-var jiathis_config={
-	data_track_clickback:true,
-	summary:"",
-	shortUrl:false,
-	hideMore:false
-}
-</script>
-<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
-<!-- JiaThis Button END -->
-
-</div>
-
   
-
-</article>
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
+  
+  </article>
 
 
 
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
-        
-      </ul>
-
+    <div class="post-spread">
+      
     </div>
   </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Gogap</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/gogap" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NATS是什么"><span class="nav-number">1.</span> <span class="nav-text">NATS是什么?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么是NATS"><span class="nav-number">2.</span> <span class="nav-text">为什么是NATS?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Micro-on-NATS"><span class="nav-number">3.</span> <span class="nav-text">Micro on NATS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transport"><span class="nav-number">4.</span> <span class="nav-text">Transport</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Broker"><span class="nav-number">5.</span> <span class="nav-text">Broker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Register"><span class="nav-number">6.</span> <span class="nav-text">Register</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大规模在Micro中使用NATS"><span class="nav-number">7.</span> <span class="nav-text">大规模在Micro中使用NATS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Gogap</span>
+
+  
+
+  
 </div>
 
 
 
-  
-      <div class="fexo-comments comments-post">
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
     
-  <section class="disqus-comments">
-    <div id="disqus_thread">
-      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
-  </section>
-
-  <script>
-    var disqus_shortname = 'gogap';
-    
-    var disqus_url = 'http://gogap.cn/2016/04/11/micro-on-nats/';
-    
-    (function(){
-      var dsq = document.createElement('script');
-      dsq.type = 'text/javascript';
-      dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-  </script>
-
-  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
-
-
-
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-
-
+    
 
   </div>
 
   
 
-  <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
   }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
-    });
-  }
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'gogap',
+            repo: 'gogap.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '65c8a1f0c0e90c4d11636b6ddcc1f726f35c74b0',
+            
+                client_id: '82ef79eda17d31aea8ad'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
 
 </body>
 </html>

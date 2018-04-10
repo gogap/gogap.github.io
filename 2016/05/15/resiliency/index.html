@@ -1,19 +1,103 @@
 <!DOCTYPE html>
 
 
-  <html class="light page-post">
+
+  
 
 
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  
-  <title>使用Micro构建有弹性的、高容错的应用 | Gogap</title>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
 
   
-    <meta name="keywords" content="Micro," />
-  
+
+
+
 
   <meta name="description" content="这是一系列介绍Micro框架的文章的第七篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 自发表上篇文章以来，已经有一段时间了，但我们仍然努力在为Micro添砖加瓦，现在确实需要还债了，让我们一次解决掉。 如果你想先了解一下 Micro工具箱，阅读以前的文章即可。 构建分布式系统是很有挑战性的，这毫无疑问。虽然我们已经解决了很多工程上的问题，我们仍然重复的在构建许多模块。目前，由于">
 <meta name="keywords" content="Micro">
@@ -36,168 +120,278 @@
 <meta name="twitter:description" content="这是一系列介绍Micro框架的文章的第七篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。 自发表上篇文章以来，已经有一段时间了，但我们仍然努力在为Micro添砖加瓦，现在确实需要还债了，让我们一次解决掉。 如果你想先了解一下 Micro工具箱，阅读以前的文章即可。 构建分布式系统是很有挑战性的，这毫无疑问。虽然我们已经解决了很多工程上的问题，我们仍然重复的在构建许多模块。目前，由于">
 <meta name="twitter:image" content="https://blog.micro.mu/assets/images/discovery.png">
 
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=eaf5ab1e" rel="stylesheet">
 
 
-  
-    <link rel="stylesheet" href="/css/personal-style.css">
+  <link rel="alternate" href="/atom.xml" title="Gogap" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://gogap.cn/2016/05/15/resiliency/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>使用Micro构建有弹性的、高容错的应用 | Gogap</title>
   
 
-  
 
-  
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
 
 </head>
 
-<body>
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+    
   
 
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Gogap</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
       
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
+        <p class="site-subtitle"></p>
       
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
   </div>
 
-
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#动机"><span class="toc-text">动机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端"><span class="toc-text">客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么客户端重要"><span class="toc-text">为什么客户端重要?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务发现"><span class="toc-text">服务发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#节点选择"><span class="toc-text">节点选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#负载策略"><span class="toc-text">负载策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存"><span class="toc-text">缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#黑名单"><span class="toc-text">黑名单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#超时与重试"><span class="toc-text">超时与重试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接池"><span class="toc-text">连接池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-text">其他?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务版本"><span class="toc-text">服务版本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么版本很重要"><span class="toc-text">为什么版本很重要</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#过滤"><span class="toc-text">过滤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么过滤重要"><span class="toc-text">为什么过滤重要</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#插件化的架构"><span class="toc-text">插件化的架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么插件化很重要"><span class="toc-text">为什么插件化很重要?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#插件"><span class="toc-text">插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我怎样使用插件"><span class="toc-text">我怎样使用插件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wrappers"><span class="toc-text">wrappers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#我怎样使用Wrapper"><span class="toc-text">我怎样使用Wrapper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#circuit-breaker"><span class="toc-text">circuit breaker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rate-Limiting"><span class="toc-text">Rate Limiting</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务端"><span class="toc-text">服务端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#处理错误"><span class="toc-text">处理错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加更多功能设计"><span class="toc-text">增加更多功能设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端与Sidecar"><span class="toc-text">客户端与Sidecar</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#还有更多"><span class="toc-text">还有更多</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Platform"><span class="toc-text">Platform</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
-  </div>
 
 
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
 
-<div class="content content-post CENTER">
-   <article id="post-resiliency" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">使用Micro构建有弹性的、高容错的应用</h1>
+      
+        
+        
+          
+  
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
 
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2016.05.15</span>
-      </span>
-
-       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>lubia</span>
-        </span>
       
 
       
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/微服务/">微服务</a>
-  </span>
-
-
-
       
+    </ul>
+  
 
-    </div>
-  </header>
+  
 
-  <div class="article-content">
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
     
-      <p>这是一系列介绍<a href="http://github.com/micro" target="_blank" rel="external">Micro</a>框架的文章的第七篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。</p>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://gogap.cn/2016/05/15/resiliency/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Gogap">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Gogap">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用Micro构建有弹性的、高容错的应用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-15T15:21:35+08:00">2016-05-15</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/微服务/" itemprop="url" rel="index"><span itemprop="name">微服务</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/05/15/resiliency/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2016/05/15/resiliency/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一系列介绍<a href="http://github.com/micro" target="_blank" rel="noopener">Micro</a>框架的文章的第七篇，我将会把作者的博客翻译成中文，推广Micro这个微服务框架。</p>
 <p>自发表上篇文章以来，已经有一段时间了，但我们仍然努力在为Micro添砖加瓦，现在确实需要还债了，让我们一次解决掉。</p>
-<p>如果你想先了解一下 <a href="https://github.com/micro/micro" target="_blank" rel="external"><strong>Micro</strong></a>工具箱，阅读以前的文章即可。</p>
+<p>如果你想先了解一下 <a href="https://github.com/micro/micro" target="_blank" rel="noopener"><strong>Micro</strong></a>工具箱，阅读以前的文章即可。</p>
 <p>构建分布式系统是很有挑战性的，这毫无疑问。虽然我们已经解决了很多工程上的问题，我们仍然重复的在构建许多模块。目前，由于我们开始了更高级别的抽象，虚拟机到容器技术，适应新的语言，作用于云计算，都对微服务提出了要求。总有一些事情需要我们不断的去学习，怎样构建高性能的、高容错的系统仍然是下一波的技术浪潮。</p>
 <p>重复与创新之间的战争从未停止，但我们需要做一些事情，通过云计算、容器技术、微服务来缓解我们的痛苦。</p>
 <h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>我们为什么这样做？为什么我们持续的重新构建同样的模块，为什么我们持续的尝试解决大规模、容错性和分布式系统的问题？</p>
 <p>我脑海中出现的是『<em>bigger, stronger, faster</em>』，或者是『<em>speed, scale, agility</em>』，你可能经常从C级别的管理人员口中听到这个说法。但关键的是，确实存在这样的需求，需要我们构建更加高性能和要弹性的系统。</p>
 <p>在互联网的早期，只有数千或者数万用户在线，随着时间的推移，我们看到开始加速，现在我们面对的是数十亿用户和数十亿的设备。我们需要学习怎样为目前的情况构建系统。</p>
-<p>上一代的人也许记得<a href="http://www.kegel.com/c10k.html" target="_blank" rel="external">C10K problem</a>，我不确定我们现在处在什么阶段，但我想我们现在谈论的是百万级的并发。世界上最大的技术公司，在10年前就已经解决了这个问题，也有了模式来构建这样大规模的系统。但剩下的其他人仍然在学习。</p>
+<p>上一代的人也许记得<a href="http://www.kegel.com/c10k.html" target="_blank" rel="noopener">C10K problem</a>，我不确定我们现在处在什么阶段，但我想我们现在谈论的是百万级的并发。世界上最大的技术公司，在10年前就已经解决了这个问题，也有了模式来构建这样大规模的系统。但剩下的其他人仍然在学习。</p>
 <p>像Amazon，Google，Microsoft现在提供给我们的云计算平台，对大规模部署是有益的。但我们仍然努力在搞清楚，怎样编写应用程序，可以高效的利用这些大规模的资源。你也许这些天听说了容器的编排，微服务、云计算很多了。工作在很多层面上推进着，当我们完全确定了我们的模式，确定了需要解决的问题，我们的Micro就能作为工业级的产品发布了，这还需要一段时间。</p>
 <p>许多公司现在求助的问题是『我该怎样构建可扩展的、高容错的系统？』但目前对这些重要的问题，有帮助的回答是很少的。</p>
 <p>我该怎样编写可扩展的、高容错的系统？</p>
@@ -205,8 +399,8 @@
 <h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>客户端在go-micro中是用于发起请求的模块，如果你已经构建过微服务挥着SOA架构，你会知道重要的一部分时间和执行过程是花在调用其他服务获取相关信息上面。</p>
 <p>然而在巨大的应用中，关注点主要在接受请求返回内容，在微服务世界中，更像是取回或者发布内容。</p>
 <p>这里是精简过的go-micro中client的接口，有最重要的三个方法Call, Publish  和 Stream。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Client <span class="keyword">interface</span> &#123;</div><div class="line">	Call(ctx context.Context, req Request, rsp <span class="keyword">interface</span>&#123;&#125;, opts ...CallOption) error</div><div class="line">	Publish(ctx context.Context, p Publication, opts ...PublishOption) error</div><div class="line">	Stream(ctx context.Context, req Request, opts ...CallOption) (Streamer, error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Request <span class="keyword">interface</span> &#123;</div><div class="line">	Service() <span class="keyword">string</span></div><div class="line">	Method() <span class="keyword">string</span></div><div class="line">	ContentType() <span class="keyword">string</span></div><div class="line">	Request() <span class="keyword">interface</span>&#123;&#125;</div><div class="line">	Stream() <span class="keyword">bool</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Client <span class="keyword">interface</span> &#123;</span><br><span class="line">	Call(ctx context.Context, req Request, rsp <span class="keyword">interface</span>&#123;&#125;, opts ...CallOption) error</span><br><span class="line">	Publish(ctx context.Context, p Publication, opts ...PublishOption) error</span><br><span class="line">	Stream(ctx context.Context, req Request, opts ...CallOption) (Streamer, error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Request <span class="keyword">interface</span> &#123;</span><br><span class="line">	Service() <span class="keyword">string</span></span><br><span class="line">	Method() <span class="keyword">string</span></span><br><span class="line">	ContentType() <span class="keyword">string</span></span><br><span class="line">	Request() <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">	Stream() <span class="keyword">bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>Call和Stream是用来做同步通信请求，Call返回一个单一的结果，而Stream是一个双向的流式连接，与另一个服务维持着，其中任何消息都可以发进来也可以发出去。Publish用于发布异步的消息，通过broker，但我们今天不讨论它。</p>
 <p>客户端是怎样工作的，前面的文章已经讨论过了。翻看以前的文章即可。</p>
 <p>我们只是特别的讨论一些重要的内部细节。</p>
@@ -220,7 +414,7 @@
 <p>它们都使用基于Paxos的Raft算法来进行网络选举，这解决了我们的一致性问题。通过运行一个3到5个节点的集群，我们可以容忍大部分的系统故障，为客户端提供稳定可靠的服务。</p>
 <h2 id="节点选择"><a href="#节点选择" class="headerlink" title="节点选择"></a>节点选择</h2><p>现在我们可靠的把服务名字解析到了一堆地址列表。我们怎样选择其中的一个进行调用呢?这就是go-micro中的selector发挥作用的地方。它基于register模块构建，提供负载均衡策略，比如轮询或者随机，也提供过滤、缓存和黑名单的功能。</p>
 <p>这里是定义的接口：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Selector <span class="keyword">interface</span> &#123;</div><div class="line">	Select(service <span class="keyword">string</span>, opts ...SelectOption) (Next, error)</div><div class="line">	Mark(service <span class="keyword">string</span>, node *registry.Node, err error)</div><div class="line">	Reset(service <span class="keyword">string</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> Next <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(*registry.Node, error)</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">Filter</span> <span class="title">func</span><span class="params">([]*registry.Service)</span> []*<span class="title">registry</span>.<span class="title">Service</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">Strategy</span> <span class="title">func</span><span class="params">([]*registry.Service)</span> <span class="title">Next</span></span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Selector <span class="keyword">interface</span> &#123;</span><br><span class="line">	Select(service <span class="keyword">string</span>, opts ...SelectOption) (Next, error)</span><br><span class="line">	Mark(service <span class="keyword">string</span>, node *registry.Node, err error)</span><br><span class="line">	Reset(service <span class="keyword">string</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Next <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="params">(*registry.Node, error)</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">Filter</span> <span class="title">func</span><span class="params">([]*registry.Service)</span> []*<span class="title">registry</span>.<span class="title">Service</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">Strategy</span> <span class="title">func</span><span class="params">([]*registry.Service)</span> <span class="title">Next</span></span></span><br></pre></td></tr></table></figure>
 <h2 id="负载策略"><a href="#负载策略" class="headerlink" title="负载策略"></a>负载策略</h2><p>当前的策略是非常简单直接的，当Selector被调用时，它从register获取到服务，然后创建一个Next函数，从节点池中选择出符合要求的节点。</p>
 <p>客户端会调用这个Next函数，根据负载均衡策略，获取到下一个符合要求的节点，并发出请求。如果这个请求失败了，而且重试次数大于1，它会使用相同的程序，获取下一个节点，再次调用。</p>
 <p>这里是有很多不同的策略的，比如轮询、随机、最少连接、权重等等。负载均衡策略对于分布式系统是必不可少的。</p>
@@ -231,7 +425,7 @@
 <h2 id="黑名单"><a href="#黑名单" class="headerlink" title="黑名单"></a>黑名单</h2><p>下面介绍一下黑名单，注意一下Selector的接口有Mark和Reset方法。我们不同真正的保证，注册进来的节点都是健康的，所以我们需要做黑名单。</p>
 <p>任何一个请求发送之后，我们都会跟踪它的结果。如果这个服务的实例出现了多次失败，我们就可以大体上把这个节点加入黑名单，并过滤掉它。</p>
 <p>节点在回到节点池之前会在黑名单中会存在一段时间，这是很严格的，如果这个节点失败了我们就需要移除掉它。这样我们可以持续的返回成功的请求，不会有任何延迟。</p>
-<h2 id="超时与重试"><a href="#超时与重试" class="headerlink" title="超时与重试"></a>超时与重试</h2><p>Adrian Cockroft最近开始讨论在微服务架构中消失的组件，其中一个有意思的是，传统的超时和重试策略导致了雪崩效应。我建议你看看这个<a href="http://www.slideshare.net/adriancockcroft/microservices-whats-missing-oreilly-software-architecture-new-york#24" target="_blank" rel="external">演示</a>。这个演示把问题总结的特别好。</p>
+<h2 id="超时与重试"><a href="#超时与重试" class="headerlink" title="超时与重试"></a>超时与重试</h2><p>Adrian Cockroft最近开始讨论在微服务架构中消失的组件，其中一个有意思的是，传统的超时和重试策略导致了雪崩效应。我建议你看看这个<a href="http://www.slideshare.net/adriancockcroft/microservices-whats-missing-oreilly-software-architecture-new-york#24" target="_blank" rel="noopener">演示</a>。这个演示把问题总结的特别好。</p>
 <p><img src="https://blog.micro.mu/assets/images/timeouts.png" alt=""></p>
 <p>Adrian 在上面描述的是一种常见的情况，一个缓慢的响应会导致超时，然后客户端会触发重试。这事实上是一个请求链路，这创造了一系列的新请求，而旧有的请求仍然在处理中。这样的配置失误会导致大量服务的过载，造成的调用失败是很难回滚的。</p>
 <p>在微服务世界，我们需要重新想想，处理重试和超时的策略。Adrian继续讨论了潜在的解决方案。其中一种方式是超时之后，在新的节点上发起请求。</p>
@@ -243,30 +437,30 @@
 <p>按照Adrian提到的，提供动态的预算型超时是非常好的，避免了不必要的雪崩。</p>
 <p>更远一点来说，下一步应该是移除任何类型静态的超时。服务的响应时间根据环境的不同，请求的不同是不同的。这应该是动态的SLA，根据当前的状态进行调整，但这些事会留在未来解决。</p>
 <h2 id="连接池"><a href="#连接池" class="headerlink" title="连接池"></a>连接池</h2><p>连接池是构建可扩展系统的很重要部分，我们很快就看到了没有连接池的局限性，经常导致文件描述符数量达到限制，导致端口用尽。</p>
-<p>目前有个进行中的<a href="https://github.com/micro/go-micro/pull/86" target="_blank" rel="external">PR</a>为go-micro增加了连接池，由于Micro插件化的特性，把连接池放在transport的上层很重要，这样HTTP，NATS，RabbitMQ等等，都会受益。</p>
+<p>目前有个进行中的<a href="https://github.com/micro/go-micro/pull/86" target="_blank" rel="noopener">PR</a>为go-micro增加了连接池，由于Micro插件化的特性，把连接池放在transport的上层很重要，这样HTTP，NATS，RabbitMQ等等，都会受益。</p>
 <p>你也许会想，这是特定实现的，一些transport也许已经支持了。这是对的，不能总是保证在不同的transport下工作效果是一样的。通过把这个放置于上层，我们减少了transport模块的复杂性。</p>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他?"></a>其他?</h2><p>确实有很多好用的东西是go-micro内置的，那么还有什么呢？我很高兴你这么问…</p>
 <h2 id="服务版本"><a href="#服务版本" class="headerlink" title="服务版本"></a>服务版本</h2><p>我们有这个功能，这个功能在前面的文章也讨论过了。服务包括名字和版本，注册在服务发现系统。当一个服务从注册器中查询出来时，它的节点是按照版本分组的。这样一样，selector就可以根据版本，进行流量负载。</p>
 <p><img src="https://blog.micro.mu/assets/images/selector.png" alt=""></p>
 <h3 id="为什么版本很重要"><a href="#为什么版本很重要" class="headerlink" title="为什么版本很重要"></a>为什么版本很重要</h3><p>当我们发布新版本时，这非常重要，它可以确保所有事情运作正常，这样才能把所有服务进行升级。新版本可以被部署到一个小型的节点上，客户端会自动的分发一定比例的请求到这个新的节点。通过结合一些编排系统比如Kubernetes，你可以非常有信心的部署，一旦有任何问题也可以回滚。</p>
-<h2 id="过滤"><a href="#过滤" class="headerlink" title="过滤"></a>过滤</h2><p>我们也有，selector是非常强大的，它有能力把过滤条件传递进去，对节点进行过滤。这在client端调用时可以传递参数。一些意见存在的过滤可以在<a href="https://github.com/micro/go-micro/blob/master/selector/filter.go" target="_blank" rel="external">这里</a>看到，比如metadata，endpoint和版本过滤。</p>
+<h2 id="过滤"><a href="#过滤" class="headerlink" title="过滤"></a>过滤</h2><p>我们也有，selector是非常强大的，它有能力把过滤条件传递进去，对节点进行过滤。这在client端调用时可以传递参数。一些意见存在的过滤可以在<a href="https://github.com/micro/go-micro/blob/master/selector/filter.go" target="_blank" rel="noopener">这里</a>看到，比如metadata，endpoint和版本过滤。</p>
 <h3 id="为什么过滤重要"><a href="#为什么过滤重要" class="headerlink" title="为什么过滤重要"></a>为什么过滤重要</h3><p>你也许有一些功能只在某些特定版本的服务上存在。需要将这些请求分发到这些特定版本的服务上。这是非常好的功能，特别是多个不同版本的服务在同时运行时。</p>
 <p>另外一个有用的地方是，你想要根据地区对服务进行路由。通过设置数据中心的标签在服务上，你可以过滤出本地的节点。根据metadata进行过滤是非常强大的，希望有更多的应该能够把这个功能使用起来。</p>
 <h2 id="插件化的架构"><a href="#插件化的架构" class="headerlink" title="插件化的架构"></a>插件化的架构</h2><p>Micro原生的插件化架构是你一次又一次听到的。这从设计的第一天就已经确定了。这是非常重要的，Micro提供模块来构建整个系统。有时候的运行会超出控制，但这些都可以改善。</p>
 <h3 id="为什么插件化很重要"><a href="#为什么插件化很重要" class="headerlink" title="为什么插件化很重要?"></a>为什么插件化很重要?</h3><p>每个人对怎样构建分布式系统都有自己的想法，我们实际上是提供了一个方式，让人们能设计他们想要的解决方案。不仅如此，现在也有很多经过严格测试的工具，我们可以直接使用，而不是自己重写任何东西。</p>
 <p>技术始终在进化，全新的、更好的工具每天都在出现。我们怎样避免止步不前，插件化的架构意味着我们可以使用目前的组件，未来也可以使用更好的组件进行替代。</p>
 <h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><p>每个go-micro的特性都被设计成golang中的接口，通过这样做，我们可以实际上替换底层的实现，这几乎不需要进行代码改动。在大部分情况下，只需要简单的引用这个包，然后在启动时加入参数就可以了。</p>
-<p>在<a href="https://github.com/micro/go-plugins" target="_blank" rel="external">go-plugins</a>有很多现成的插件可以使用。</p>
-<p>go-micro目前提供了默认的consul作为服务发现系统，http作为transport，你也许会想要使用一些别的东西，或者实现自己的插件。我们已经有社区的贡献者分享了<a href="https://github.com/micro/go-plugins/tree/master/registry/kubernetes" target="_blank" rel="external">Kubernetes</a> 的注册插件和<a href="https://github.com/micro/go-plugins/pull/24" target="_blank" rel="external">Zookeeper</a>的注册插件。</p>
+<p>在<a href="https://github.com/micro/go-plugins" target="_blank" rel="noopener">go-plugins</a>有很多现成的插件可以使用。</p>
+<p>go-micro目前提供了默认的consul作为服务发现系统，http作为transport，你也许会想要使用一些别的东西，或者实现自己的插件。我们已经有社区的贡献者分享了<a href="https://github.com/micro/go-plugins/tree/master/registry/kubernetes" target="_blank" rel="noopener">Kubernetes</a> 的注册插件和<a href="https://github.com/micro/go-plugins/pull/24" target="_blank" rel="noopener">Zookeeper</a>的注册插件。</p>
 <h3 id="我怎样使用插件"><a href="#我怎样使用插件" class="headerlink" title="我怎样使用插件"></a>我怎样使用插件</h3><p>大部分时候，插件的使用类似这样：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># Import the plugin</div><div class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/registry/etcd"</span></div></pre></td></tr></table></figure>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --registry=etcd --registry_address=<span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">2379</span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># Import the plugin</span><br><span class="line"><span class="keyword">import</span> _ <span class="string">"github.com/micro/go-plugins/registry/etcd"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> run main.<span class="keyword">go</span> --registry=etcd --registry_address=<span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">2379</span></span><br></pre></td></tr></table></figure>
 <p>如果你想要看更多的细节，参考之前讨论 Micro on NATS的文章。</p>
 <h2 id="wrappers"><a href="#wrappers" class="headerlink" title="wrappers"></a>wrappers</h2><p>客户端和服务端都支持中间件的概念，称为wrapper。通过支持中间件，我们可以增加在请求和返回的业务逻辑前面或者后面，添加自定义的逻辑。</p>
 <p>中间件是很容易理解的概念，数以千计的库在使用它。在处理崩溃、限制并发、认证、日志、记录等场景下，很容易发现它的妙处。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># Client Wrappers</div><div class="line"><span class="keyword">type</span> Wrapper <span class="function"><span class="keyword">func</span><span class="params">(Client)</span> <span class="title">Client</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">StreamWrapper</span> <span class="title">func</span><span class="params">(Streamer)</span> <span class="title">Streamer</span></span></div><div class="line"><span class="function"></span></div><div class="line"><span class="function"># <span class="title">Server</span> <span class="title">Wrappers</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">HandlerWrapper</span> <span class="title">func</span><span class="params">(HandlerFunc)</span> <span class="title">HandlerFunc</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">SubscriberWrapper</span> <span class="title">func</span><span class="params">(SubscriberFunc)</span> <span class="title">SubscriberFunc</span></span></div><div class="line"><span class="function"><span class="title">type</span> <span class="title">StreamerWrapper</span> <span class="title">func</span><span class="params">(Streamer)</span> <span class="title">Streamer</span></span></div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># Client Wrappers</span><br><span class="line"><span class="keyword">type</span> Wrapper <span class="function"><span class="keyword">func</span><span class="params">(Client)</span> <span class="title">Client</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">StreamWrapper</span> <span class="title">func</span><span class="params">(Streamer)</span> <span class="title">Streamer</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># <span class="title">Server</span> <span class="title">Wrappers</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">HandlerWrapper</span> <span class="title">func</span><span class="params">(HandlerFunc)</span> <span class="title">HandlerFunc</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">SubscriberWrapper</span> <span class="title">func</span><span class="params">(SubscriberFunc)</span> <span class="title">SubscriberFunc</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">StreamerWrapper</span> <span class="title">func</span><span class="params">(Streamer)</span> <span class="title">Streamer</span></span></span><br></pre></td></tr></table></figure>
 <h2 id="我怎样使用Wrapper"><a href="#我怎样使用Wrapper" class="headerlink" title="我怎样使用Wrapper"></a>我怎样使用Wrapper</h2><p>这里是一个很直接的插件</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"github.com/micro/go-micro"</span></div><div class="line">	<span class="string">"github.com/micro/go-plugins/wrapper/breaker/hystrix"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	service := micro.NewService(</div><div class="line">		micro.Name(<span class="string">"myservice"</span>),</div><div class="line">		micro.WrapClient(hystrix.NewClientWrapper()),</div><div class="line">	)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"github.com/micro/go-micro"</span></span><br><span class="line">	<span class="string">"github.com/micro/go-plugins/wrapper/breaker/hystrix"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	service := micro.NewService(</span><br><span class="line">		micro.Name(<span class="string">"myservice"</span>),</span><br><span class="line">		micro.WrapClient(hystrix.NewClientWrapper()),</span><br><span class="line">	)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>很容易对不对，我们发现很多公司在Micro上层，创建了自己的层级，用于初始化大部分默认的wrapper，所以所有的wrapper可以在同一个地方进行添加。</p>
 <p>现在我们看看wrapper怎样让应用更有弹性，更能容错。</p>
 <h2 id="circuit-breaker"><a href="#circuit-breaker" class="headerlink" title="circuit breaker"></a>circuit breaker</h2><p>在SOA或者微服务世界，一个单独的请求可能会调用多个服务。大部分情况下，聚合许多信息返回给调用者。在成功的情况下，它运行的很好，但一旦发生错误，很容易触发雪崩式的错误，除了重启整个系统，很难恢复。</p>
@@ -277,9 +471,9 @@
 <p>虽然内部的Micro客户端有一些容错特性，但我们不应该依赖它来解决所有问题。在wrapper中使用circuit breakers让我们受益很多。</p>
 <h2 id="Rate-Limiting"><a href="#Rate-Limiting" class="headerlink" title="Rate Limiting"></a>Rate Limiting</h2><p>如果我们非常轻松的能响应世界上所有的请求，那就太好了，不过是在梦里。真实的世界不是这样工作的，执行一个查询需要消耗时间，资源的限制让我们只能响应一定数量的请求。</p>
 <p>我们需要考虑限制发起请求的数量，或者限制并发响应的数量。这就是rate limiting发挥作用的地方。如果没有rate limiting，很容易会把资源耗尽，或者完全的让系统崩溃，让系统不能响应未来的任何请求。这经常是DDOS攻击的常见做法。</p>
-<p>每个人都听说过，使用过或者实现过一些类型的rate limiting。这里有很多不同的算法，其中一种是<a href="https://en.wikipedia.org/wiki/Leaky_bucket" target="_blank" rel="external">Leaky Bucket</a> 算法，我们不会在这里展开，但值得一读。</p>
-<p>我们可以使用Micro Wrapper和已经存在的库来使用这个函数，一个已经存在的库在<a href="https://github.com/micro/go-plugins/blob/master/wrapper/ratelimiter/ratelimit/ratelimit.go" target="_blank" rel="external">这里</a>。</p>
-<p>我们实际上对YouTube实现的<a href="https://github.com/youtube/doorman" target="_blank" rel="external">Doorman</a>算法很感兴趣，一个全局的客户端rate limiter，我们也在寻求社区的其他实现。</p>
+<p>每个人都听说过，使用过或者实现过一些类型的rate limiting。这里有很多不同的算法，其中一种是<a href="https://en.wikipedia.org/wiki/Leaky_bucket" target="_blank" rel="noopener">Leaky Bucket</a> 算法，我们不会在这里展开，但值得一读。</p>
+<p>我们可以使用Micro Wrapper和已经存在的库来使用这个函数，一个已经存在的库在<a href="https://github.com/micro/go-plugins/blob/master/wrapper/ratelimiter/ratelimit/ratelimit.go" target="_blank" rel="noopener">这里</a>。</p>
+<p>我们实际上对YouTube实现的<a href="https://github.com/youtube/doorman" target="_blank" rel="noopener">Doorman</a>算法很感兴趣，一个全局的客户端rate limiter，我们也在寻求社区的其他实现。</p>
 <h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>前面介绍了很多客户端的很多特性和使用方式，那么服务端呢，第一件事需要注意的是Micro在go-micro的API、CLI、Sidecar等等都使用了客户端，客户端的特性让整个架构都收益，但我们仍然需要在服务端解决一些问题。</p>
 <p>在客户端，register用于发现服务，服务端进行注册。当一个服务的实例运行起来时，它在服务发现系统进行注册，在退出时进行注销，关键词是『gracefully』。</p>
 <p><img src="https://blog.micro.mu/assets/images/register.png" alt=""></p>
@@ -289,214 +483,518 @@
 <h2 id="增加更多功能设计"><a href="#增加更多功能设计" class="headerlink" title="增加更多功能设计"></a>增加更多功能设计</h2><p>另一件需要注意的事情是，服务端也提供了能力来使用Wrapper和中间件，这意味着我们也可以做circuit breaking， rate limiting等其他一些特性。</p>
 <p>服务端的这个功能故意的设计的简单，但插件化的特性可以让你自由扩展。</p>
 <h2 id="客户端与Sidecar"><a href="#客户端与Sidecar" class="headerlink" title="客户端与Sidecar"></a>客户端与Sidecar</h2><p>大部分我们讨论的都是存在于go-micro库中，这对所有的golang使用者是很好的，但其他人在想，我怎样从这里收益呢。</p>
-<p>在最开始，Micro就包含了<a href="https://github.com/micro/micro/tree/master/car" target="_blank" rel="external">Sidecar</a>的设计理念，这是一个HTTP的代理，所有的go-micro的功能都内置其中，所以不管你用哪种语言构建你的应用，你都可以收益于我们在上面的讨论。</p>
+<p>在最开始，Micro就包含了<a href="https://github.com/micro/micro/tree/master/car" target="_blank" rel="noopener">Sidecar</a>的设计理念，这是一个HTTP的代理，所有的go-micro的功能都内置其中，所以不管你用哪种语言构建你的应用，你都可以收益于我们在上面的讨论。</p>
 <p><img src="https://blog.micro.mu/assets/images/sidecar-rpc.png" alt=""></p>
-<p>sidecar的设计模式并不是新东西，NetflixOSS有一个叫做<a href="https://github.com/Netflix/Prana" target="_blank" rel="external">Prana</a>的项目。Buoyant有一个叫<a href="https://linkerd.io/" target="_blank" rel="external">Linkerd</a>的项目。</p>
+<p>sidecar的设计模式并不是新东西，NetflixOSS有一个叫做<a href="https://github.com/Netflix/Prana" target="_blank" rel="noopener">Prana</a>的项目。Buoyant有一个叫<a href="https://linkerd.io/" target="_blank" rel="noopener">Linkerd</a>的项目。</p>
 <p>Micro Sidecar使用了默认的go-micro客户端，如果你想使用其他功能，你可以添加参数，很容易的重新编译。我们会想办法在未来简化这个程序。</p>
-<h2 id="还有更多"><a href="#还有更多" class="headerlink" title="还有更多"></a>还有更多</h2><p>这里讨论了许多<a href="https://github.com/micro/go-micro" target="_blank" rel="external">go-micro</a>的包和相关的工具，这些工具是很好的开始，但他们还不够。当你想要运行一个可扩展的、数以百计的微服务，处理数百万请求，仍然有许多问题需要解决。</p>
-<h3 id="Platform"><a href="#Platform" class="headerlink" title="Platform"></a>Platform</h3><p>这是<a href="https://github.com/micro/go-platform" target="_blank" rel="external">go-platform</a>和<a href="https://github.com/micro/platform" target="_blank" rel="external">platform</a>发挥作用的地方了，micro解决了基础的组件，Platform则更进一步，解决运行可扩展的服务的更多问题。比如认证、分布式trace、同步锁、健康检查等等。</p>
+<h2 id="还有更多"><a href="#还有更多" class="headerlink" title="还有更多"></a>还有更多</h2><p>这里讨论了许多<a href="https://github.com/micro/go-micro" target="_blank" rel="noopener">go-micro</a>的包和相关的工具，这些工具是很好的开始，但他们还不够。当你想要运行一个可扩展的、数以百计的微服务，处理数百万请求，仍然有许多问题需要解决。</p>
+<h3 id="Platform"><a href="#Platform" class="headerlink" title="Platform"></a>Platform</h3><p>这是<a href="https://github.com/micro/go-platform" target="_blank" rel="noopener">go-platform</a>和<a href="https://github.com/micro/platform" target="_blank" rel="noopener">platform</a>发挥作用的地方了，micro解决了基础的组件，Platform则更进一步，解决运行可扩展的服务的更多问题。比如认证、分布式trace、同步锁、健康检查等等。</p>
 <p>分布式系统需要一系列的工具用于提高容错性，Platform看起来会有帮助。通过提供一个分层的架构，我们可以在原始的核心工具上，构建任何自己需要的功能。</p>
 <p>Platform仍然在早期，但Platform会解决大部分公司构建分布式平台时会遇到的问题。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>科技在快速的进化，云计算给了我们不受限制的扩展能力。设法与变化保持同步很难，构建一个可扩展的，高容错的系统在今天仍然具有很大的挑战。</p>
 <p>但不应该用以前的方式解决问题，作为一个社区，我们可以互相帮助，适应这个新的环境，构建随着不断增长的需求而不断扩张的系统。</p>
 <p>Micro在这个过程中看起来提供了一些帮助，通过提供工具，简化了构建和管理分布式系统。希望这个文章能示范我们处理这些问题的方式。</p>
-<p>如果你想了解更多，请看这个<a href="https://blog.micro.mu/" target="_blank" rel="external">blog</a>，或者这个<a href="https://github.com/micro/micro" target="_blank" rel="external">repo</a>，Twitter可以关注<a href="https://twitter.com/microhq" target="_blank" rel="external">@MicroHQ</a>，Slack社区在[这里</p>
+<p>如果你想了解更多，请看这个<a href="https://blog.micro.mu/" target="_blank" rel="noopener">blog</a>，或者这个<a href="https://github.com/micro/micro" target="_blank" rel="noopener">repo</a>，Twitter可以关注<a href="https://twitter.com/microhq" target="_blank" rel="noopener">@MicroHQ</a>，Slack社区在[这里</p>
+
+      
+    </div>
 
     
+      
+
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/05/30/deploy-micro/" rel="bookmark">怎样自动化部署微服务</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/03/28/go-micro/" rel="bookmark">使用Go Micro编写微服务</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/03/17/introduction/" rel="bookmark">Micro - 微服务生态系统</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/04/18/micro-architecture/" rel="bookmark">Micro的架构与微服务的设计模式</a></div>
+      
+    </li>
+  
+    <li class="popular-posts-item">
+      
+      
+      <div class="popular-posts-title"><a href="/2016/04/11/micro-on-nats/" rel="bookmark">基于消息队列NATS构建微服务</a></div>
+      
+    </li>
+  
+  </ul>
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Micro/" rel="tag"># Micro</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/25/the-micro-bot/" rel="next" title="Micro Bot - 微服务中的ChatOps">
+                <i class="fa fa-chevron-left"></i> Micro Bot - 微服务中的ChatOps
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/22/functional-options-for-friendly-apis/" rel="prev" title="怎样设计友好的API接口">
+                怎样设计友好的API接口 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
-    
-<div class="share_jia">
-   <!-- JiaThis Button BEGIN -->
-<div class="jiathis_style">
-<span class="jiathis_txt">
-            分享到: &nbsp;
-        </span>
-<a class="jiathis_button_tsina"></a>
-<a class="jiathis_button_weixin"></a>
-<a class="jiathis_button_evernote"></a>
-<a href="http://www.jiathis.com/share?uid=2102171" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
-</div>
-<script type="text/javascript" >
-var jiathis_config={
-	data_track_clickback:true,
-	summary:"",
-	shortUrl:false,
-	hideMore:false
-}
-</script>
-<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js?uid=2102171" charset="utf-8"></script>
-<!-- JiaThis Button END -->
-
-</div>
-
   
-
-</article>
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
+  
+  </article>
 
 
 
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
-        
-      </ul>
-
+    <div class="post-spread">
+      
     </div>
   </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Gogap</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/gogap" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#动机"><span class="nav-number">1.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端"><span class="nav-number">2.</span> <span class="nav-text">客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么客户端重要"><span class="nav-number">3.</span> <span class="nav-text">为什么客户端重要?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现"><span class="nav-number">4.</span> <span class="nav-text">服务发现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点选择"><span class="nav-number">5.</span> <span class="nav-text">节点选择</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载策略"><span class="nav-number">6.</span> <span class="nav-text">负载策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存"><span class="nav-number">7.</span> <span class="nav-text">缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#黑名单"><span class="nav-number">8.</span> <span class="nav-text">黑名单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#超时与重试"><span class="nav-number">9.</span> <span class="nav-text">超时与重试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接池"><span class="nav-number">10.</span> <span class="nav-text">连接池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">11.</span> <span class="nav-text">其他?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务版本"><span class="nav-number">12.</span> <span class="nav-text">服务版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么版本很重要"><span class="nav-number">12.1.</span> <span class="nav-text">为什么版本很重要</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤"><span class="nav-number">13.</span> <span class="nav-text">过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么过滤重要"><span class="nav-number">13.1.</span> <span class="nav-text">为什么过滤重要</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件化的架构"><span class="nav-number">14.</span> <span class="nav-text">插件化的架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么插件化很重要"><span class="nav-number">14.1.</span> <span class="nav-text">为什么插件化很重要?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插件"><span class="nav-number">14.2.</span> <span class="nav-text">插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我怎样使用插件"><span class="nav-number">14.3.</span> <span class="nav-text">我怎样使用插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wrappers"><span class="nav-number">15.</span> <span class="nav-text">wrappers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#我怎样使用Wrapper"><span class="nav-number">16.</span> <span class="nav-text">我怎样使用Wrapper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#circuit-breaker"><span class="nav-number">17.</span> <span class="nav-text">circuit breaker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rate-Limiting"><span class="nav-number">18.</span> <span class="nav-text">Rate Limiting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务端"><span class="nav-number">19.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理错误"><span class="nav-number">20.</span> <span class="nav-text">处理错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增加更多功能设计"><span class="nav-number">21.</span> <span class="nav-text">增加更多功能设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端与Sidecar"><span class="nav-number">22.</span> <span class="nav-text">客户端与Sidecar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#还有更多"><span class="nav-number">23.</span> <span class="nav-text">还有更多</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Platform"><span class="nav-number">23.1.</span> <span class="nav-text">Platform</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">24.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Gogap</span>
+
+  
+
+  
 </div>
 
 
 
-  
-      <div class="fexo-comments comments-post">
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
     
-  <section class="disqus-comments">
-    <div id="disqus_thread">
-      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
-  </section>
-
-  <script>
-    var disqus_shortname = 'gogap';
-    
-    var disqus_url = 'http://gogap.cn/2016/05/15/resiliency/';
-    
-    (function(){
-      var dsq = document.createElement('script');
-      dsq.type = 'text/javascript';
-      dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-  </script>
-
-  <script id="dsq-count-scr" src="//gogap.disqus.com/count.js" async></script>
-
-
-
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-
-
+    
 
   </div>
 
   
 
-  <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
   }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
-    });
-  }
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'gogap',
+            repo: 'gogap.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '65c8a1f0c0e90c4d11636b6ddcc1f726f35c74b0',
+            
+                client_id: '82ef79eda17d31aea8ad'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
 
 </body>
 </html>
